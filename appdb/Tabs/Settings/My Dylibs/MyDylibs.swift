@@ -69,10 +69,10 @@ class MyDylibs: LoadingTableView {
     }
 
     func getDylibs(done: @escaping (_ error: String?) -> Void) {
-        API.getDylibs(success: { [weak self] dylibs in
+        API.getEnhancements(success: { [weak self] enhancements in
             guard let self = self else { return }
 
-            self.myDylibs = dylibs
+            self.myDylibs = enhancements
             done(nil)
         }, fail: { error in
             done(error.prettified)
@@ -121,8 +121,8 @@ class MyDylibs: LoadingTableView {
         [UITableViewRowAction(style: .destructive, title: "Delete".localized(), handler: { _, indexPath in
             let item = self.myDylibs[indexPath.row]
 
-            API.deleteDylib(name: item) {
-                Messages.shared.showSuccess(message: "The dylib was deleted successfully".localized(), context: .viewController(self))
+            API.deleteEnhancement(name: item) {
+                Messages.shared.showSuccess(message: "The enhancement was deleted successfully".localized(), context: .viewController(self))
                 self.loadDylibs()
             } fail: { error in
                 Messages.shared.showError(message: error, context: .viewController(self))

@@ -62,12 +62,10 @@ class CachedIPAs: LoadingTableView {
     }
 
     func getCachedIPAs(done: @escaping (_ error: String?) -> Void) {
-        API.getIPACacheStatus(success: { cacheStatus in
-            self.cachedIPAs = cacheStatus.ipas
-            done(nil)
-        }, fail: { error in
-            done(error.localizedDescription)
-        })
+        // With API v1.7, IPA cache has been replaced with installation history
+        // This functionality is no longer available
+        cachedIPAs = []
+        done("Feature no longer available in API v1.7")
     }
 
     // MARK: - Table view data source
@@ -103,12 +101,8 @@ class CachedIPAs: LoadingTableView {
     override func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath) -> [UITableViewRowAction]? {
 
         [UITableViewRowAction(style: .destructive, title: "Delete".localized(), handler: { _, indexPath in
-            let item = self.cachedIPAs[indexPath.row]
-
-            API.deleteIpaFromCache(bundleId: item.bundleId) {
-                Messages.shared.showSuccess(message: "The cached IPA was deleted successfully".localized(), context: .viewController(self))
-                self.loadCachedIPAs()
-            }
+            // With API v1.7, IPA cache functionality has been removed
+            Messages.shared.showError(message: "Feature no longer available in API v1.7", context: .viewController(self))
         })]
     }
 

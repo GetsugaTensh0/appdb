@@ -14,7 +14,7 @@ extension API {
     // MARK: - Genres
 
     static func listGenres(completion: @escaping () -> Void) {
-        AF.request(endpoint + Actions.listGenres.rawValue, parameters: ["lang": languageCode], headers: headers)
+        AF.request(endpoint + Actions.listGenres.rawValue, parameters: ["type": "official", "lang": languageCode], headers: headers)
             .responseJSON { response in
                 switch response.result {
                 case .success(let value):
@@ -23,29 +23,13 @@ extension API {
                     var genres: [Genre] = []
                     let data = json["data"]
 
-                    // Default genres
+                    // Default genres for official content
                     genres.append(Genre(category: "ios", id: "0", name: "All Categories".localized()))
-                    genres.append(Genre(category: "cydia", id: "0", name: "All Categories".localized()))
-                    genres.append(Genre(category: "books", id: "0", name: "All Categories".localized()))
 
-                    // Cydia genres
-                    for value in data["cydia"].arrayValue {
+                    // Official iOS Genres
+                    for value in data["official"].arrayValue {
                         genres.append(
-                            Genre(category: "cydia", id: value["id"].intValue.description, name: value["name"].stringValue, amount: value["content_amount"].stringValue)
-                        )
-                    }
-
-                    // iOS Genres
-                    for value in data["ios"].arrayValue {
-                        genres.append(
-                            Genre(category: "ios", id: value["id"].stringValue, name: value["name"].stringValue, amount: value["content_amount"].stringValue)
-                        )
-                    }
-
-                    // Books Genres
-                    for value in data["books"].arrayValue {
-                        genres.append(
-                            Genre(category: "books", id: value["id"].stringValue, name: value["name"].stringValue, amount: value["content_amount"].stringValue)
+                            Genre(category: "official", id: value["id"].stringValue, name: value["name"].stringValue, amount: value["content_amount"].stringValue)
                         )
                     }
 

@@ -60,14 +60,11 @@ class IPACache: LoadingTableView {
     }
 
     private func fetchStatus() {
-        API.getIPACacheStatus { [weak self] status in
-            guard let self = self else { return }
-            self.status = status
-        } fail: { [weak self] error in
-            guard let self = self else { return }
-            self.status = nil
-            self.showErrorMessage(text: "Cannot connect".localized(), secondaryText: error.localizedDescription, animated: false)
-        }
+        // With API v1.7, IPA cache has been replaced with installation history
+        // Show a message that this feature is no longer available
+        showErrorMessage(text: "Feature no longer available in API v1.7", 
+                        secondaryText: "IPA cache has been replaced with installation history", 
+                        animated: false)
     }
 
     @objc func dismissAnimated() { dismiss(animated: true) }
@@ -75,7 +72,8 @@ class IPACache: LoadingTableView {
     // MARK: - Table view data source
 
     override func numberOfSections(in tableView: UITableView) -> Int {
-        status == nil ? 0 : 2
+        // With API v1.7, IPA cache functionality is no longer available
+        0
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {

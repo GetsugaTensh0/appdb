@@ -11,7 +11,7 @@ import SwiftyJSON
 import Localize_Swift
 
 enum API {
-    static let endpoint = "https://api.dbservices.to/v1.6/"
+    static let endpoint = "https://api.dbservices.to/v1.7/"
     static let statusEndpoint = "https://status.dbservices.to/API/v1.0/"
     static let itmsHelperEndpoint = "https://dbservices.to/manifest.php"
 
@@ -110,8 +110,6 @@ enum Actions: String {
     case configure = "configure"
     case getStatus = "get_status"
     case clear = "clear"
-    case fix = "fix_command"
-    case retry = "retry_command"
     case install = "install"
     case customInstall = "custom_install"
     case report = "report"
@@ -131,26 +129,25 @@ enum Actions: String {
     case getAppdbAppsBundleIds = "get_appdb_apps_bundle_ids"
     case processRedirect = "process_redirect"
     case getAllDevices = "get_all_devices"
-    case getIpaCacheStatus = "get_ipa_cache_status"
-    case installFromCache = "install_from_cache"
-    case clearIpaCache = "clear_ipa_cache"
-    case deleteIpaFromCache = "delete_ipa_from_cache"
-    case revalidateIpaCache = "ensure_ipa_cache"
-    case transferIpaCache = "transfer_ipa_cache"
     case getAltStoreRepos = "get_altstore_repos"
     case editAltStoreRepo = "edit_altstore_repo"
     case deleteAltStoreRepo = "delete_altstore_repo"
     case getPlusPurchaseOptions = "get_plus_purchase_options"
     case getSideloadingOptions = "get_sideloading_options"
     case getFeatures = "get_features"
-    case getDylibs = "get_dylibs"
-    case addDylib = "add_dylib"
-    case deleteDylib = "delete_dylib"
     case getEnterpriseCerts = "get_enterprise_certs"
+    case getSubscriptions = "get_subscriptions"
+    case getPurchases = "get_purchases"
+    case addEnhancement = "add_enhancement"
+    case getEnhancements = "get_enhancements"
+    case deleteEnhancement = "delete_enhancement"
+    case getEnhancementAnalyzeJobs = "get_enhancement_analyze_jobs"
+    case editIPAMetadata = "edit_ipa_metadata"
+    case trackEnhancementAddition = "track_enhancement_addition"
+    case getInstallHistory = "get_install_history"
 }
 
 enum ConfigurationParameters: String {
-    case appsync = "params[appsync]"
     case ignoreCompatibility = "params[ignore_compatibility]"
     case askForOptions = "params[ask_for_installation_options]"
     case clearDevEntity = "params[clear_developer_entity]"
@@ -168,5 +165,5 @@ enum AdditionalInstallationParameters: String {
     case trainer = "enable_features[trainer]"
     case removePlugins = "enable_features[remove_plugins]"
     case pushNotifications = "enable_features[push]"
-    case injectDylibs = "enabled_features[inject_dylibs]"
+    case injectEnhancements = "enabled_features[inject_enhancements]"
 }

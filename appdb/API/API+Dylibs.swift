@@ -12,8 +12,8 @@ import SwiftyJSON
 
 extension API {
 
-    static func getDylibs(success: @escaping (_ items: [String]) -> Void, fail: @escaping (_ error: String) -> Void) {
-        AF.request(endpoint + Actions.getDylibs.rawValue, parameters: ["lang": languageCode], headers: headersWithCookie)
+    static func getEnhancements(success: @escaping (_ items: [String]) -> Void, fail: @escaping (_ error: String) -> Void) {
+        AF.request(endpoint + "get_enhancements", parameters: ["lang": languageCode], headers: headersWithCookie)
             .responseJSON { response in
                 switch response.result {
                 case .success(let value):
@@ -29,8 +29,8 @@ extension API {
             }
     }
 
-    static func addDylib(url: String, success: @escaping () -> Void, fail: @escaping (_ error: String) -> Void) {
-        AF.request(endpoint + Actions.addDylib.rawValue, parameters: ["url": url, "lang": languageCode], headers: headersWithCookie)
+    static func addEnhancement(url: String, success: @escaping () -> Void, fail: @escaping (_ error: String) -> Void) {
+        AF.request(endpoint + "add_enhancement", parameters: ["url": url, "lang": languageCode], headers: headersWithCookie)
             .responseJSON { response in
                 switch response.result {
                 case .success(let value):
@@ -47,11 +47,11 @@ extension API {
             }
     }
 
-    static func uploadDylib(fileURL: URL, request: @escaping (_ r: Alamofire.UploadRequest) -> Void, completion: @escaping (_ error: String?) -> Void) {
+    static func uploadEnhancement(fileURL: URL, request: @escaping (_ r: Alamofire.UploadRequest) -> Void, completion: @escaping (_ error: String?) -> Void) {
 
         request(AF.upload(multipartFormData: { multipartFormData in
-            multipartFormData.append(fileURL, withName: "dylib")
-        }, to: endpoint + Actions.addDylib.rawValue, method: .post, headers: headersWithCookie).responseJSON { response in
+            multipartFormData.append(fileURL, withName: "enhancement")
+        }, to: endpoint + "add_enhancement", method: .post, headers: headersWithCookie).responseJSON { response in
 
             switch response.result {
             case .success(let value):
@@ -67,8 +67,8 @@ extension API {
         })
     }
 
-    static func deleteDylib(name: String, success: @escaping () -> Void, fail: @escaping (_ error: String) -> Void) {
-        AF.request(endpoint + Actions.deleteDylib.rawValue, parameters: ["name": name, "lang": languageCode], headers: headersWithCookie)
+    static func deleteEnhancement(name: String, success: @escaping () -> Void, fail: @escaping (_ error: String) -> Void) {
+        AF.request(endpoint + "delete_enhancement", parameters: ["name": name, "lang": languageCode], headers: headersWithCookie)
             .responseJSON { response in
                 switch response.result {
                 case .success(let value):

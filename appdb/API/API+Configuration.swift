@@ -36,7 +36,6 @@ extension API {
 
                         let data = json["data"]
                         // checkRevocation(completion: { isRevoked, revokedOn in
-                            Preferences.set(.appsync, to: data["appsync"].stringValue == "yes")
                             Preferences.set(.ignoreCompatibility, to: data["ignore_compatibility"].stringValue == "yes")
                             Preferences.set(.askForInstallationOptions, to: data["ask_for_installation_options"].stringValue == "yes")
 
@@ -99,7 +98,6 @@ extension API {
                         // Update values
                         for (key, value) in params {
                             switch key {
-                            case .appsync: Preferences.set(.appsync, to: value == "yes")
                             case .askForOptions: Preferences.set(.askForInstallationOptions, to: value == "yes")
                             case .ignoreCompatibility: Preferences.set(.ignoreCompatibility, to: value == "yes")
                             case .disableProtectionChecks: Preferences.set(.disableRevocationChecks, to: value == "yes")
