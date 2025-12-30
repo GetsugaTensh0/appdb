@@ -12,24 +12,19 @@ import SwiftyJSON
 extension API {
 
     static func getUpdatesTicket(success: @escaping (_ ticket: String) -> Void, fail: @escaping (_ error: String) -> Void) {
-        AF.request(endpoint + Actions.getUpdatesTicket.rawValue, parameters: ["lang": languageCode], headers: headersWithCookie)
-            .responseJSON { response in
-                switch response.result {
-                case .success(let value):
-                    let json = JSON(value)
-                    if !json["success"].boolValue {
-                        fail(json["errors"][0]["translated"].stringValue)
-                    } else {
-                        success(json["data"].stringValue)
-                    }
-                case .failure(let error):
-                    fail(error.localizedDescription)
-                }
-            }
+        // get_update_ticket is deprecated in API 1.7. Callers should use getUpdates
+        // directly without a ticket.
+        fail("Update tickets are not used with API v1.7.")
     }
 
-    static func getUpdates(ticket: String, success: @escaping (_ items: [UpdateableApp]) -> Void, fail: @escaping (_ error: String, _ code: String) -> Void) {
-        let request = AF.request(endpoint + Actions.getUpdates.rawValue, parameters: ["t": ticket, "lang": languageCode], headers: headersWithCookie)
+    static func getUpdates(ticket: String? = nil,
+                           success: @escaping (_ items: [UpdateableApp]) -> Void,
+                           fail: @escaping (_ error: String, _ code: String) -> Void) {
+        var parameters: [String: Any] = ["lang": languageCode]
+        if let ticket = ticket, !ticket.isEmpty {
+            parameters["t"] = ticket
+        }
+        let request = AF.request(endpoint + Actions.getUpdates.rawValue, parameters: parameters, headers: headersWithCookie)
 
         quickCheckForErrors(request, completion: { ok, hasError, errorCode in
             if ok {

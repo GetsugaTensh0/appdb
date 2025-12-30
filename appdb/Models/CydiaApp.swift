@@ -67,6 +67,7 @@ class CydiaApp: Item {
     override func mapping(map: Map) {
         name <- map["name"]
         id <- map["id"]
+        universalObjectIdentifier <- map["universal_object_identifier"]
         image <- map["image"]
         bundleId <- map["bundle_id"]
         developer <- map["pname"]

@@ -145,7 +145,7 @@ extension Details {
 
     // Get links
     func getLinks() {
-        API.getLinks(type: contentType, trackid: content.itemId, success: { [weak self] items in
+        API.getLinks(universalObjectIdentifier: content.itemUniversalObjectIdentifier, success: { [weak self] items in
             guard let self = self else { return }
 
             self.versions = items

@@ -72,6 +72,7 @@ class Book: Item {
     override func mapping(map: Map) {
         name <- map["name"]
         id <- map["id"]
+        universalObjectIdentifier <- map["universal_object_identifier"]
         image <- map["image"]
         price <- map["price"]
         categoryId <- map["genre_id"]

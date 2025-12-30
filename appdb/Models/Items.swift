@@ -15,6 +15,8 @@ class Item: Hashable, Mappable {
     func mapping(map: Map) { }
 
     var id: Int = 0
+    /// API 1.7 universal object identifier used with universal_gateway
+    var universalObjectIdentifier: String = ""
 
     class func type() -> ItemType {
         .ios // Default implementation

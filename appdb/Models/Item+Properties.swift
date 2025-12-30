@@ -20,6 +20,11 @@ extension Item {
         return ""
     }
 
+    /// Convenience wrapper around `universalObjectIdentifier` from API 1.7 search_index
+    var itemUniversalObjectIdentifier: String {
+        universalObjectIdentifier
+    }
+
     var itemName: String {
         if let app = self as? App { return app.name.decoded }
         if let cydiaApp = self as? CydiaApp { return cydiaApp.name.decoded }

@@ -67,15 +67,37 @@ class Updates: LoadingTableView {
         }
     }
 
-    // get update ticket -> check updates -> update UI
+    // get updates -> update UI
 
     func checkUpdates() {
         isLoading = true
         if Preferences.deviceIsLinked {
-            API.getUpdatesTicket(success: { [weak self] ticket in
+            API.getUpdates(ticket: nil, success: { [weak self] apps in
                 guard let self = self else { return }
 
-                self.getUpdates(ticket, done: { [weak self] error in
+                self.retryCount = 0
+                self.allApps = apps
+                let mixed = apps.filter({ !$0.isIgnored }).sorted { $0.name.lowercased() < $1.name.lowercased() }
+                self.updateableApps = mixed.filter { $0.updateable == 1 }
+                self.nonUpdateableApps = mixed.filter { $0.updateable == 0 }
+
+                self.isLoading = false
+                self.tableView.spr_endRefreshing()
+                self.updateBadge()
+                self.navigationItem.rightBarButtonItem?.isEnabled = true
+
+                if self.updateableApps.isEmpty && self.nonUpdateableApps.isEmpty {
+                    self.tableView.reloadData()
+                    self.showErrorMessage(text: "No updates found".localized(), animated: self.animated)
+                } else {
+                    self.state = .done
+                }
+            }, fail: { [weak self] error, _ in
+                guard let self = self else { return }
+
+                self.cleanup()
+                self.showErrorMessage(text: "Cannot connect".localized(), secondaryText: error, animated: false)
+            })
                     guard let self = self else { return }
 
                     if let error = error {

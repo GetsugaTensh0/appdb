@@ -19,7 +19,7 @@ extension API {
         API.search(type: CydiaApp.self, trackid: trackid, success: { apps in
             if let app = apps.first {
                 if app.version.compare(currentVersion, options: .numeric) == .orderedDescending {
-                    API.getLinks(type: .cydia, trackid: trackid, success: { versions in
+                    API.getLinks(universalObjectIdentifier: app.universalObjectIdentifier, success: { versions in
                         if let firstLink = versions.first(where: { $0.number == app.version })?.links.first {
                             success(app, firstLink.id)
                         }

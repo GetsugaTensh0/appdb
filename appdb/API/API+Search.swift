@@ -13,7 +13,7 @@ import ObjectMapper
 extension API {
 
     static func search <T>(type: T.Type, order: Order = .all, price: Price = .all, genre: String = "0", dev: String = "0", trackid: String = "0", q: String = "", page: Int = 1, success: @escaping (_ items: [T]) -> Void, fail: @escaping (_ error: String) -> Void) where T: Item {
-        let request = AF.request(endpoint + Actions.search.rawValue, parameters: ["type": T.type().rawValue, "order": order.rawValue, "price": price.rawValue, "genre": genre, "dev": dev, "trackid": trackid, "q": q, "start": 25 * (page - 1), "length": 25, "lang": languageCode], headers: headers)
+        let request = AF.request(endpoint + Actions.searchIndex.rawValue, parameters: ["type": T.type().rawValue, "order": order.rawValue, "price": price.rawValue, "genre": genre, "dev": dev, "trackid": trackid, "q": q, "start": 25 * (page - 1), "length": 25, "lang": languageCode], headers: headers)
 
         quickCheckForErrors(request, completion: { ok, hasError, _ in
             if ok {
@@ -32,7 +32,7 @@ extension API {
     }
 
     static func fastSearch(type: ItemType, query: String, maxResults: Int = 10, success: @escaping (_ results: [String]) -> Void) {
-        AF.request(endpoint + Actions.search.rawValue, parameters: ["type": type.rawValue,
+        AF.request(endpoint + Actions.searchIndex.rawValue, parameters: ["type": type.rawValue,
                                          "order": Order.all.rawValue,
                                          "q": query,
                                          "lang": languageCode,
@@ -71,7 +71,7 @@ extension API {
     }
 
     static func getTrending(type: ItemType, order: Order = .all, maxResults: Int = 8, success: @escaping (_ results: [String]) -> Void) {
-        AF.request(endpoint + Actions.search.rawValue, parameters: ["type": type.rawValue,
+        AF.request(endpoint + Actions.searchIndex.rawValue, parameters: ["type": type.rawValue,
                                          "order": order.rawValue,
                                          "lang": languageCode,
                                          "perpage": maxResults], headers: headers)

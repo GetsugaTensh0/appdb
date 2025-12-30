@@ -11,7 +11,7 @@ import SwiftyJSON
 import Localize_Swift
 
 enum API {
-    static let endpoint = "https://api.dbservices.to/v1.6/"
+    static let endpoint = "https://api.dbservices.to/v1.7/"
     static let statusEndpoint = "https://status.dbservices.to/API/v1.0/"
     static let itmsHelperEndpoint = "https://dbservices.to/manifest.php"
 
@@ -97,7 +97,8 @@ enum Price: String, CaseIterable {
 }
 
 enum Actions: String {
-    case search = "search"
+    case search = "search" // deprecated in API 1.7, kept for backward-compat constants
+    case searchIndex = "search_index"
     case listGenres = "list_genres"
     case promotions = "promotions"
     case getLinks = "get_links"
@@ -130,22 +131,26 @@ enum Actions: String {
     case getAppdbAppsBundleIdsTicket = "get_appdb_apps_bundle_ids_ticket"
     case getAppdbAppsBundleIds = "get_appdb_apps_bundle_ids"
     case processRedirect = "process_redirect"
+    case universalGateway = "universal_gateway"
     case getAllDevices = "get_all_devices"
-    case getIpaCacheStatus = "get_ipa_cache_status"
-    case installFromCache = "install_from_cache"
-    case clearIpaCache = "clear_ipa_cache"
-    case deleteIpaFromCache = "delete_ipa_from_cache"
-    case revalidateIpaCache = "ensure_ipa_cache"
-    case transferIpaCache = "transfer_ipa_cache"
+    case getIpaCacheStatus = "get_ipa_cache_status" // removed in 1.7
+    case installFromCache = "install_from_cache" // removed in 1.7
+    case clearIpaCache = "clear_ipa_cache" // removed in 1.7
+    case deleteIpaFromCache = "delete_ipa_from_cache" // removed in 1.7
+    case revalidateIpaCache = "ensure_ipa_cache" // removed in 1.7
+    case transferIpaCache = "transfer_ipa_cache" // removed in 1.7
+    case getInstallationHistory = "get_installation_history"
     case getAltStoreRepos = "get_altstore_repos"
     case editAltStoreRepo = "edit_altstore_repo"
     case deleteAltStoreRepo = "delete_altstore_repo"
     case getPlusPurchaseOptions = "get_plus_purchase_options"
     case getSideloadingOptions = "get_sideloading_options"
     case getFeatures = "get_features"
-    case getDylibs = "get_dylibs"
-    case addDylib = "add_dylib"
-    case deleteDylib = "delete_dylib"
+    // Dylib APIs were removed in API 1.7 and replaced by Enhancements APIs
+    case getEnhancements = "get_enhancements"
+    case addEnhancement = "add_enhancement"
+    case deleteEnhancement = "delete_enhancement"
+    case getEnhancementAnalyzeJobs = "get_enhancement_analyze_jobs"
     case getEnterpriseCerts = "get_enterprise_certs"
 }
 

@@ -66,7 +66,8 @@ class IPACache: LoadingTableView {
         } fail: { [weak self] error in
             guard let self = self else { return }
             self.status = nil
-            self.showErrorMessage(text: "Cannot connect".localized(), secondaryText: error.localizedDescription, animated: false)
+            // IPA cache is gone in API 1.7 – inform the user accordingly.
+            self.showErrorMessage(text: "IPA cache is not available".localized(), secondaryText: error.localizedDescription, animated: false)
         }
     }
 

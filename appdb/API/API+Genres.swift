@@ -89,7 +89,7 @@ extension API {
     }
 
     static func getIcon(id: String, type: ItemType, completion: @escaping (String) -> Void) {
-        AF.request(endpoint + Actions.search.rawValue, parameters: ["type": type.rawValue, "genre": id, "order": Order.all.rawValue, "lang": languageCode], headers: headers)
+        AF.request(endpoint + Actions.searchIndex.rawValue, parameters: ["type": type.rawValue, "genre": id, "order": Order.all.rawValue, "lang": languageCode], headers: headers)
             .responseJSON { response in
                 switch response.result {
                 case .success(let value):

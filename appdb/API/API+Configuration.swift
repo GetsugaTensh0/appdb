@@ -35,10 +35,13 @@ extension API {
                     } else {
 
                         let data = json["data"]
-                        // checkRevocation(completion: { isRevoked, revokedOn in
+                        // Appsynch and some PLUS/PRO-related fields were removed in API 1.7.
+                        // Use safe defaults when these keys are missing.
+                        if data["appsync"].exists() {
                             Preferences.set(.appsync, to: data["appsync"].stringValue == "yes")
-                            Preferences.set(.ignoreCompatibility, to: data["ignore_compatibility"].stringValue == "yes")
-                            Preferences.set(.askForInstallationOptions, to: data["ask_for_installation_options"].stringValue == "yes")
+                        }
+                        Preferences.set(.ignoreCompatibility, to: data["ignore_compatibility"].stringValue == "yes")
+                        Preferences.set(.askForInstallationOptions, to: data["ask_for_installation_options"].stringValue == "yes")
 
                             // Preferences.set(.revoked, to: isRevoked)
                             // Preferences.set(.revokedOn, to: revokedOn)
@@ -54,24 +57,39 @@ extension API {
                             Preferences.set(.deviceVersion, to: data["ios_version"].stringValue)
 
                             // Preferences.set(.isPlus, to: data["is_plus"].stringValue == "yes")
-                            let plusUntil = data["plus_till"].stringValue.unixToDate
-                            Preferences.set(.isPlus, to: plusUntil.timeIntervalSince1970 > Date().timeIntervalSince1970)
-                            Preferences.set(.plusUntil, to: data["plus_till"].stringValue)
+                            // In API 1.7, PLUS status and history are exposed via subscriptions
+                            // APIs instead of configuration. Keep backward-compatible behaviour
+                            // when plus_till is present, otherwise leave existing PLUS prefs.
+                            if data["plus_till"].exists() {
+                                let plusUntil = data["plus_till"].stringValue.unixToDate
+                                Preferences.set(.isPlus, to: plusUntil.timeIntervalSince1970 > Date().timeIntervalSince1970)
+                                Preferences.set(.plusUntil, to: data["plus_till"].stringValue)
+                            }
                             Preferences.set(.enterpriseCertId, to: data["enterprise_cert_id"].stringValue)
                             Preferences.set(.signingWith, to: data["signing_with"].stringValue)
                             Preferences.set(.freeSignsLeft, to: data["free_signs_left"].stringValue)
                             Preferences.set(.freeSignsResetAt, to: data["free_signs_reset_at"].stringValue)
                             Preferences.set(.p12ValidationResult, to: data["p12_validation_result"].boolValue)
 
-                            Preferences.set(.plusStatus, to: data["plus_account"]["status"].stringValue)
-                            Preferences.set(.plusStatusTranslated, to: data["plus_account"]["status_translated"].stringValue)
-                            Preferences.set(.plusProvider, to: data["plus_provider"].stringValue)
-                            Preferences.set(.plusSupportUri, to: data["plus_support_uri"].stringValue)
+                            if data["plus_account"].exists() {
+                                Preferences.set(.plusStatus, to: data["plus_account"]["status"].stringValue)
+                                Preferences.set(.plusStatusTranslated, to: data["plus_account"]["status_translated"].stringValue)
+                            }
+                            if data["plus_provider"].exists() {
+                                Preferences.set(.plusProvider, to: data["plus_provider"].stringValue)
+                            }
+                            if data["plus_support_uri"].exists() {
+                                Preferences.set(.plusSupportUri, to: data["plus_support_uri"].stringValue)
+                            }
 
                             Preferences.set(.disableRevocationChecks, to: data["disable_protection_checks"].stringValue == "yes")
                             Preferences.set(.forceDisablePRO, to: data["is_pro_disabled"].stringValue == "yes")
                             Preferences.set(.signingIdentityType, to: data["signing_identity_type"].stringValue)
                             Preferences.set(.optedOutFromEmails, to: data["is_opted_out_from_emails"].stringValue == "yes")
+
+                            // Best-effort update of subscriptions info; do not fail configuration
+                            // call if subscriptions endpoint is unavailable.
+                            refreshSubscriptions(success: { }, fail: { _ in })
 
                             success()
                         // }, fail: { error in
