@@ -92,7 +92,7 @@ class Updates: LoadingTableView {
                 } else {
                     self.state = .done
                 }
-            }, fail: { [weak self] error in
+            }, fail: { [weak self] error, _ in
                 guard let self = self else { return }
 
                 self.cleanup()
