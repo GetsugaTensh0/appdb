@@ -20,24 +20,31 @@ jobs:
 
       - name: Resolve Swift Package Dependencies
         run: |
-          xcodebuild -resolvePackageDependencies
+          xcodebuild -resolvePackageDependencies \
+            -project appdb.xcodeproj \
+            -scheme appdb
 
       - name: Build archive (unsigned)
         run: |
+          mkdir -p build
           xcodebuild archive \
             -project appdb.xcodeproj \
             -scheme appdb \
             -configuration Release \
             -archivePath build/appdb.xcarchive \
+            -destination "generic/platform=iOS" \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY="" \
+            CODE_SIGN_STYLE=Manual \
             DEVELOPMENT_TEAM="" \
             PROVISIONING_PROFILE_SPECIFIER="" \
-            -destination "generic/platform=iOS"
+            PROVISIONING_PROFILE="" \
+            SKIP_INSTALL=NO
 
       - name: Export unsigned IPA
         run: |
+          mkdir -p build/ipa
           cat <<EOF > ExportOptions.plist
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -51,6 +58,10 @@ jobs:
             <true/>
             <key>compileBitcode</key>
             <false/>
+            <key>signingCertificate</key>
+            <string></string>
+            <key>teamID</key>
+            <string></string>
           </dict>
           </plist>
           EOF
@@ -59,7 +70,18 @@ jobs:
             -archivePath build/appdb.xcarchive \
             -exportPath build/ipa \
             -exportOptionsPlist ExportOptions.plist \
-            CODE_SIGNING_ALLOWED=NO
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO || true
+          
+          # If export fails, try to extract IPA manually from archive
+          if [ ! -f build/ipa/*.ipa ]; then
+            echo "Standard export failed, attempting manual extraction..."
+            mkdir -p build/ipa/Payload
+            cp -r build/appdb.xcarchive/Products/Applications/appdb.app build/ipa/Payload/
+            cd build/ipa
+            zip -r appdb.ipa Payload
+            cd ../..
+          fi
 
       - name: Upload IPA artifact
         uses: actions/upload-artifact@v4
