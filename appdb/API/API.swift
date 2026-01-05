@@ -173,5 +173,5 @@ enum AdditionalInstallationParameters: String {
     case trainer = "enable_features[trainer]"
     case removePlugins = "enable_features[remove_plugins]"
     case pushNotifications = "enable_features[push]"
-    case injectDylibs = "enabled_features[inject_dylibs]"
+    case injectDylibs = "enable_features[inject_dylibs]"
 }
