@@ -92,31 +92,6 @@ class Updates: LoadingTableView {
                 } else {
                     self.state = .done
                 }
-            }, fail: { [weak self] error, _ in
-                guard let self = self else { return }
-
-                self.cleanup()
-                self.showErrorMessage(text: "Cannot connect".localized(), secondaryText: error, animated: false)
-            })
-                    guard let self = self else { return }
-
-                    if let error = error {
-                        self.cleanup()
-                        self.showErrorMessage(text: "Cannot connect".localized(), secondaryText: error, animated: self.animated)
-                    } else {
-                        self.isLoading = false
-                        self.tableView.spr_endRefreshing()
-                        self.updateBadge()
-                        self.navigationItem.rightBarButtonItem?.isEnabled = true
-
-                        if self.updateableApps.isEmpty && self.nonUpdateableApps.isEmpty {
-                            self.tableView.reloadData()
-                            self.showErrorMessage(text: "No updates found".localized(), animated: self.animated)
-                        } else {
-                            self.state = .done
-                        }
-                    }
-                })
             }, fail: { [weak self] error in
                 guard let self = self else { return }
 
