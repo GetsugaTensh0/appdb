@@ -3,7 +3,7 @@
 //  appdb
 //
 //  Created by stev3fvcks on 19.03.23.
-//  Copyright © 2023 stev3fvcks. All rights reserved.
+//  Copyright Â© 2023 stev3fvcks. All rights reserved.
 //
 
 import UIKit
@@ -21,7 +21,12 @@ extension API {
                     if !json["success"].boolValue {
                         fail(json["errors"][0]["translated"].stringValue)
                     } else {
-                        success(json["data"].arrayObject as? [String] ?? [])
+                        let names = json["data"].arrayValue.map { item -> String in
+                            if !item["name"].stringValue.isEmpty { return item["name"].stringValue }
+                            if !item["title"].stringValue.isEmpty { return item["title"].stringValue }
+                            return item.stringValue
+                        }.filter { !$0.isEmpty }
+                        success(names)
                     }
                 case .failure(let error):
                     fail(error.localizedDescription)
@@ -68,7 +73,7 @@ extension API {
     }
 
     static func deleteDylib(name: String, success: @escaping () -> Void, fail: @escaping (_ error: String) -> Void) {
-        AF.request(endpoint + Actions.deleteDylib.rawValue, parameters: ["name": name, "lang": languageCode], headers: headersWithCookie)
+        AF.request(endpoint + Actions.deleteDylib.rawValue, parameters: ["name": name, "enhancement": name, "lang": languageCode], headers: headersWithCookie)
             .responseJSON { response in
                 switch response.result {
                 case .success(let value):
