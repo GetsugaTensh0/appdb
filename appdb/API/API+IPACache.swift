@@ -3,7 +3,7 @@
 //  appdb
 //
 //  Created by ned on 05/01/22.
-//  Copyright © 2022 ned. All rights reserved.
+//  Copyright Â© 2022 ned. All rights reserved.
 //
 
 import UIKit
@@ -25,40 +25,19 @@ extension API {
     }
 
     static func reinstallEverything(success: @escaping () -> Void, fail: @escaping (_ error: String) -> Void) {
-        AF.request(endpoint + Actions.installFromCache.rawValue, parameters: ["lang": languageCode], headers: headersWithCookie)
-            .responseJSON { response in
-                switch response.result {
-                case .success(let value):
-                    let json = JSON(value)
-                    if !json["success"].boolValue {
-                       fail(json["errors"][0]["translated"].stringValue)
-                    } else {
-                        success()
-                    }
-                case .failure(let error):
-                    fail(error.localizedDescription)
-                }
-            }
+        fail("Reinstall from cache was removed in API v1.7".localized())
     }
 
     static func clearIpaCache(success: @escaping () -> Void) {
-        AF.request(endpoint + Actions.clearIpaCache.rawValue, parameters: ["lang": languageCode], headers: headersWithCookie)
-            .response { _ in
-                success()
-            }
+        success()
     }
 
     static func deleteIpaFromCache(bundleId: String, success: @escaping () -> Void) {
-        AF.request(endpoint + Actions.deleteIpaFromCache.rawValue, parameters: ["bundle_id": bundleId, "lang": languageCode], headers: headersWithCookie)
-            .response { _ in
-                success()
-            }
+        _ = bundleId
+        success()
     }
 
     static func revalidateIpaCache(success: @escaping () -> Void) {
-        AF.request(endpoint + Actions.revalidateIpaCache.rawValue, parameters: ["lang": languageCode], headers: headersWithCookie)
-            .response { _ in
-                success()
-            }
+        success()
     }
 }
