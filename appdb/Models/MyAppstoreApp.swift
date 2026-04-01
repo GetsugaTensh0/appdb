@@ -3,7 +3,7 @@
 //  appdb
 //
 //  Created by ned on 26/04/2019.
-//  Copyright © 2019 ned. All rights reserved.
+//  Copyright Â© 2019 ned. All rights reserved.
 //
 
 import SwiftyJSON
@@ -29,6 +29,8 @@ class MyAppStoreApp: Item {
     var version: String = ""
     var uploadedAt: String = ""
     var size: String = ""
+    var universalObjectIdentifier: String = ""
+    var link: String = ""
 
     override func mapping(map: Map) {
         name <- map["name"]
@@ -37,6 +39,15 @@ class MyAppStoreApp: Item {
         version <- map["bundle_version"]
         uploadedAt <- map["uploaded_at"]
         size <- map["size"]
+        universalObjectIdentifier <- map["universal_object_identifier"]
+        link <- map["link"]
+
+        if universalObjectIdentifier.isEmpty {
+            universalObjectIdentifier <- map["uoid"]
+        }
+        if link.isEmpty {
+            link <- map["download_link"]
+        }
 
         if let int64size = Int64(size) {
             size = Global.humanReadableSize(bytes: int64size)
