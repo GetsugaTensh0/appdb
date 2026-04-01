@@ -3,7 +3,7 @@
 //  appdb
 //
 //  Created by ned on 16/05/2018.
-//  Copyright © 2018 ned. All rights reserved.
+//  Copyright Â© 2018 ned. All rights reserved.
 //
 
 import UIKit
@@ -24,8 +24,6 @@ class DeviceStatus: LoadingTableView {
             self.secondaryErrorMessage.isHidden = true
         }
     }
-
-    let retriableCommands: [String] = ["ok, Managed", "ok, UserRejected", "ok, UpdateRejected", "ok, PromptingForUpdate", "ok, Installing", "ok, Prompting", "ok, ManagedButUninstalled", "ok, PromptingForManagement"]
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -168,7 +166,7 @@ class DeviceStatus: LoadingTableView {
         if let cell = tableView.dequeueReusableCell(withIdentifier: "status", for: indexPath) as? DeviceStatusCell {
             let item = statuses[indexPath.row]
             cell.updateContent(with: item)
-            cell.moreImageButton.isHidden = item.status != "failed_fixable" && !retriableCommands.contains(item.status)
+            cell.moreImageButton.isHidden = true
             return cell
         }
         return UITableViewCell()
@@ -176,40 +174,6 @@ class DeviceStatus: LoadingTableView {
 
     // Option to Fix or Retry command with given UUID
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        if statuses[indexPath.row].status == "failed_fixable" {
-            presentControllerToRetryOrFixCommand(index: indexPath, canFix: true)
-        } else if retriableCommands.contains(statuses[indexPath.row].status) {
-            presentControllerToRetryOrFixCommand(index: indexPath)
-        }
-    }
-
-    private func presentControllerToRetryOrFixCommand(index: IndexPath, canFix: Bool = false) {
-        let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet, adaptive: true)
-
-        if canFix {
-            let fix = UIAlertAction(title: "Fix".localized(), style: .default) { _ in
-                API.fixCommand(uuid: self.statuses[index.row].uuid)
-            }
-            alertController.addAction(fix)
-        }
-
-        let retry = UIAlertAction(title: "Retry".localized(), style: .default) { _ in
-            API.retryCommand(uuid: self.statuses[index.row].uuid)
-        }
-        let cancel = UIAlertAction(title: "Cancel".localized(), style: .cancel)
-
-        alertController.addAction(retry)
-        alertController.addAction(cancel)
-
-        if let presenter = alertController.popoverPresentationController {
-            presenter.theme_backgroundColor = Color.popoverArrowColor
-            presenter.sourceView = self.view
-            presenter.sourceRect = tableView.rectForRow(at: index)
-            presenter.permittedArrowDirections = [.up, .down]
-        }
-
-        DispatchQueue.main.async {
-            self.present(alertController, animated: true)
-        }
+        Messages.shared.showError(message: "Command retry/fix is not available in API v1.7".localized(), context: .viewController(self))
     }
 }
