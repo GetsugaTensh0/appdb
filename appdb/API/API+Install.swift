@@ -3,7 +3,7 @@
 //  appdb
 //
 //  Created by ned on 28/09/2018.
-//  Copyright © 2018 ned. All rights reserved.
+//  Copyright Â© 2018 ned. All rights reserved.
 //
 
 import UIKit
@@ -25,7 +25,7 @@ extension API {
     }
 
     static func install(id: String, type: ItemType, additionalOptions: [AdditionalInstallationParameters: Any] = [:], completion: @escaping (_ error: String?) -> Void) {
-        var parameters: [String: Any] = ["type": type.rawValue, "id": id, "lang": languageCode]
+        var parameters: [String: Any] = ["id": id, "uoid": id, "lang": languageCode]
         for (key, value) in additionalOptions { parameters[key.rawValue] = value }
 
         AF.request(endpoint + Actions.install.rawValue, parameters: parameters, headers: headersWithCookie)
@@ -45,7 +45,7 @@ extension API {
     }
 
     static func customInstall(ipaUrl: String, type: ItemType, iconUrl: String, bundleId: String, name: String, additionalOptions: [AdditionalInstallationParameters: Any] = [:], completion: @escaping (_ error: String?) -> Void) {
-        var parameters: [String: Any] = ["type": type.rawValue, "link": ipaUrl, "image": iconUrl, "bundle_id": bundleId, "name": name, "lang": languageCode]
+        var parameters: [String: Any] = ["link": ipaUrl, "image": iconUrl, "bundle_id": bundleId, "name": name, "lang": languageCode]
         for (key, value) in additionalOptions { parameters[key.rawValue] = value }
 
         AF.request(endpoint + Actions.install.rawValue, parameters: parameters, headers: headersWithCookie)
