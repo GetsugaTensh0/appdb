@@ -3,7 +3,7 @@
 //  appdb
 //
 //  Created by ned on 14/04/2018.
-//  Copyright © 2018 ned. All rights reserved.
+//  Copyright Â© 2018 ned. All rights reserved.
 //
 
 import UIKit
@@ -106,10 +106,6 @@ extension Settings {
 
     var deviceLinkedSections: [StaticSection] {
         var deviceConfigRows = [
-            StaticRow(text: "Jailbroken w/ Appsync".localized(), accessory: .switchToggle(value: Preferences.appsync) { newValue in
-                API.setConfiguration(params: [.appsync: newValue ? "yes" : "no"], success: {}, fail: { _ in })
-            }, cellClass: SimpleStaticCell.self),
-
             StaticRow(text: "Compatibility Checks".localized(), accessory: .switchToggle(value: !Preferences.ignoresCompatibility) { newValue in
                 API.setConfiguration(params: [.ignoreCompatibility: newValue ? "no" : "yes"], success: {}, fail: { _ in })
             }, cellClass: SimpleStaticCell.self),
@@ -120,7 +116,7 @@ extension Settings {
         ]
         
         if Preferences.isPlus {
-            deviceConfigRows.append( StaticRow(text: "IPA Cache".localized(), selection: { [unowned self] _ in
+            deviceConfigRows.append( StaticRow(text: "Install History".localized(), selection: { [unowned self] _ in
                 self.push(IPACache())
             }, accessory: .disclosureIndicator, cellClass: SimpleStaticCell.self))
         }
@@ -161,7 +157,7 @@ extension Settings {
                 }, accessory: .disclosureIndicator, cellClass: SimpleStaticCell.self)
             ]),
             StaticSection(rows: [
-                StaticRow(text: "My Dylibs, Frameworks and Debs".localized(), selection: { [unowned self] _ in
+                StaticRow(text: "My Enhancements".localized(), selection: { [unowned self] _ in
                     self.push(MyDylibs())
                 }, accessory: .disclosureIndicator, cellClass: SimpleStaticCell.self)
             ]),
