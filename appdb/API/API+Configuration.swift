@@ -97,9 +97,11 @@ extension API {
                         // Update values
                         for (key, value) in params {
                             switch key {
+                            case .appsync: Preferences.set(.appsync, to: value == "yes")
                             case .askForOptions: Preferences.set(.askForInstallationOptions, to: value == "yes")
                             case .ignoreCompatibility: Preferences.set(.ignoreCompatibility, to: value == "yes")
                             case .disableProtectionChecks: Preferences.set(.disableRevocationChecks, to: value == "yes")
+                            case .forceDisablePRO: Preferences.set(.forceDisablePRO, to: value == "yes")
                             case .clearDevEntity: break
                             case .signingIdentityType: Preferences.set(.signingIdentityType, to: value)
                             case .enterpriseCertId: Preferences.set(.enterpriseCertId, to: value)
