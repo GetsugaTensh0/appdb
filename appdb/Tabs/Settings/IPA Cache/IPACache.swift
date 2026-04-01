@@ -3,7 +3,7 @@
 //  appdb
 //
 //  Created by ned on 05/01/22.
-//  Copyright © 2022 ned. All rights reserved.
+//  Copyright Â© 2022 ned. All rights reserved.
 //
 
 import UIKit
@@ -28,7 +28,7 @@ class IPACache: LoadingTableView {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        title = "IPA Cache".localized()
+        title = "Install History".localized()
 
         tableView.register(SimpleStaticCell.self, forCellReuseIdentifier: "cell")
         tableView.estimatedRowHeight = 50
@@ -81,13 +81,13 @@ class IPACache: LoadingTableView {
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         status == nil
             ? 0
-            : section == 0 ? 1 : 5
+            : section == 0 ? 1 : 2
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         if let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath) as? SimpleStaticCell, let status = status {
             if (indexPath.section == 0) {
-                cell.textLabel?.text = "Cached IPAs".localized()
+                cell.textLabel?.text = "Install History Items".localized()
                 cell.detailTextLabel?.text = "\(status.ipas.count)"
                 cell.textLabel?.theme_textColor = Color.title
                 cell.selectionStyle = .default
@@ -104,22 +104,8 @@ class IPACache: LoadingTableView {
                     cell.detailTextLabel?.text = status.inUpdate == 1 ? "Yes".localized() : "No".localized()
                     cell.textLabel?.theme_textColor = Color.title
                     cell.selectionStyle = .none
-                case 2:
-                    cell.textLabel?.text = "Reinstall everything".localized()
-                    cell.detailTextLabel?.text = nil
-                    cell.textLabel?.theme_textColor = Color.mainTint
-                    cell.selectionStyle = .default
-                case 3:
-                    cell.textLabel?.text = "Clear IPA cache".localized()
-                    cell.detailTextLabel?.text = nil
-                    cell.textLabel?.theme_textColor = Color.mainTint
-                    cell.selectionStyle = .default
-                case 4:
-                    cell.textLabel?.text = "Re-validate IPA cache".localized()
-                    cell.detailTextLabel?.text = nil
-                    cell.textLabel?.theme_textColor = Color.mainTint
-                    cell.selectionStyle = .default
-                default: break
+                default:
+                    break
                 }
             }
             return cell
@@ -134,7 +120,7 @@ class IPACache: LoadingTableView {
             return nil
         }
         let view = UpdatesSectionHeader(showsButton: section == 0)
-        view.configure(with: "IPA cache status for current device".localized())
+        view.configure(with: "Install history for current device".localized())
         view.helpButton.addTarget(self, action: #selector(self.showHelp), for: .touchUpInside)
         return view
     }
@@ -155,31 +141,12 @@ class IPACache: LoadingTableView {
             let cachedIPAsVc = CachedIPAs()
             cachedIPAsVc.cachedIPAs = status!.ipas
             navigationController?.pushViewController(cachedIPAsVc, animated: true)
-        } else {
-            switch indexPath.row {
-            case 2:
-                API.reinstallEverything(success: {
-                    Messages.shared.showSuccess(message: "Success".localized(), context: .viewController(self))
-                }, fail: { error in
-                    Messages.shared.showError(message: error.prettified, context: .viewController(self))
-                })
-            case 3:
-                API.clearIpaCache {
-                    Messages.shared.showSuccess(message: "Success".localized(), context: .viewController(self))
-                }
-            case 4:
-                API.revalidateIpaCache {
-                    Messages.shared.showSuccess(message: "Success".localized(), context: .viewController(self))
-                }
-            default:
-                break
-            }
         }
     }
 
     @objc func showHelp() {
-        let message = "appdb saves all installed IPA files for your device to cache, so you can easily restore all your apps after device reset or revocation. Cache is stored per device, and will be deleted if you will unlink your device. If you restored your device and missing appdb profile, you can visit device status page and tap \"Update profile\" button to install it, or link device via email by tapping \"Just link new device\" in message from appdb.\n\nNote: IPA files does not contain app data, if you want to keep your app data, backup device via Finder or iTunes, Remove revoked apps, Install apps from cache and then restore backup from Finder or iTunes.".localized()
-        let alertController = UIAlertController(title: "IPA cache status for current device".localized(), message: message, preferredStyle: .alert, adaptive: true)
+        let message = "API v1.7 provides installation history instead of IPA cache actions. You can review previous installs from this page.".localized()
+        let alertController = UIAlertController(title: "Install history for current device".localized(), message: message, preferredStyle: .alert, adaptive: true)
         let okAction = UIAlertAction(title: "OK".localized(), style: .cancel)
         alertController.addAction(okAction)
         self.present(alertController, animated: true)
