@@ -3,7 +3,7 @@
 //  appdb
 //
 //  Created by ned on 19/02/2017.
-//  Copyright © 2017 ned. All rights reserved.
+//  Copyright Â© 2017 ned. All rights reserved.
 //
 
 import UIKit
@@ -163,7 +163,7 @@ class Details: LoadingTableView {
                 // Otherwise, just return static cells
                 return details[indexPath.row]
             case .reviews:
-                if indexPath.row == content.itemReviews.count { return DetailsPublisher("Reviews are from Apple's iTunes Store ©".localized()) }
+                if indexPath.row == content.itemReviews.count { return DetailsPublisher("Reviews are from Apple's iTunes Store Â©".localized()) }
                 if let cell = tableView.dequeueReusableCell(withIdentifier: "review", for: indexPath) as? DetailsReview {
                     cell.desc.collapsed = reviewCollapsedForIndexPath[indexPath] ?? true
                     cell.configure(with: content.itemReviews[indexPath.row])
@@ -369,16 +369,11 @@ class Details: LoadingTableView {
     // MARK: - Report link with reason
 
     override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
-        indexForSegment == .download && Preferences.deviceIsLinked && !versions.isEmpty
+        false
     }
 
     override func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath) -> [UITableViewRowAction]? {
-        let report = UITableViewRowAction(style: .normal, title: "Report".localized()) { _, _ in
-            let id = self.versions[indexPath.section - 2].links[indexPath.row].id
-            self.showReportAlert(id)
-        }
-        report.backgroundColor = .red
-        return [report]
+        []
     }
 
     func showReportAlert(_ id: String) {
