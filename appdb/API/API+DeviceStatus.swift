@@ -3,7 +3,7 @@
 //  appdb
 //
 //  Created by ned on 15/05/2018.
-//  Copyright © 2018 ned. All rights reserved.
+//  Copyright Â© 2018 ned. All rights reserved.
 //
 
 import UIKit
@@ -36,11 +36,7 @@ extension API {
         }
     }
 
-    static func fixCommand(uuid: String) {
-        AF.request(endpoint + Actions.fix.rawValue, parameters: ["uuid": uuid, "lang": languageCode], headers: headersWithCookie).responseJSON { _ in }
-    }
+    static func fixCommand(uuid: String) { _ = uuid }
 
-    static func retryCommand(uuid: String) {
-        AF.request(endpoint + Actions.retry.rawValue, parameters: ["uuid": uuid, "lang": languageCode], headers: headersWithCookie).responseJSON { _ in }
-    }
+    static func retryCommand(uuid: String) { _ = uuid }
 }
