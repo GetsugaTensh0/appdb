@@ -3,7 +3,7 @@
 //  appdb
 //
 //  Created by stev3fvcks on 19.03.23.
-//  Copyright © 2023 stev3fvcks. All rights reserved.
+//  Copyright Â© 2023 stev3fvcks. All rights reserved.
 //
 
 import UIKit
@@ -17,7 +17,7 @@ class MyDylibs: LoadingTableView {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        self.title = "My Dylibs, Frameworks and Debs".localized()
+        self.title = "My Enhancements".localized()
 
         setUp()
 
@@ -48,7 +48,7 @@ class MyDylibs: LoadingTableView {
 
                     if self.myDylibs.isEmpty {
                         self.tableView.reloadData()
-                        self.showErrorMessage(text: "No dylibs found".localized(), animated: self.animated)
+                        self.showErrorMessage(text: "No enhancements found".localized(), animated: self.animated)
                     } else {
                         self.state = .done
                     }
@@ -103,7 +103,7 @@ class MyDylibs: LoadingTableView {
 
     override func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         let view = UpdatesSectionHeader(showsButton: true)
-        view.configure(with: "My Dylibs, Frameworks and Debs".localized())
+        view.configure(with: "My Enhancements".localized())
         view.helpButton.addTarget(self, action: #selector(self.showHelp), for: .touchUpInside)
         return view
     }
@@ -122,7 +122,7 @@ class MyDylibs: LoadingTableView {
             let item = self.myDylibs[indexPath.row]
 
             API.deleteDylib(name: item) {
-                Messages.shared.showSuccess(message: "The dylib was deleted successfully".localized(), context: .viewController(self))
+                Messages.shared.showSuccess(message: "Enhancement deleted successfully".localized(), context: .viewController(self))
                 self.loadDylibs()
             } fail: { error in
                 Messages.shared.showError(message: error, context: .viewController(self))
@@ -141,8 +141,8 @@ class MyDylibs: LoadingTableView {
     }
 
     @objc func showHelp() {
-        let message = "Here you can upload or import dynamic libraries, frameworks or debian packages or ZIP archives with tweaks to inject into apps that you are installing via appdb. Uploading or importing of any file will enable “Ask for Installation Options” feature for current device, so you can choose what tweaks you want to include in the app. You can disable this option later on device features configuration page.\n\nPlease note that not all packages, dylibs or frameworks that were built for jailbroken devices will work on your non-jailbroken devices.".localized()
-        let alertController = UIAlertController(title: "My Dylibs, Frameworks and Debs".localized(), message: message, preferredStyle: .alert, adaptive: true)
+        let message = "Manage your app enhancements here. Enhancements can be selected during installation when installation options are enabled.".localized()
+        let alertController = UIAlertController(title: "My Enhancements".localized(), message: message, preferredStyle: .alert, adaptive: true)
         let okAction = UIAlertAction(title: "OK".localized(), style: .cancel)
         alertController.addAction(okAction)
         self.present(alertController, animated: true)
