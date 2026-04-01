@@ -141,10 +141,12 @@ enum Actions: String {
 }
 
 enum ConfigurationParameters: String {
+    case appsync = "params[appsync]"
     case ignoreCompatibility = "params[ignore_compatibility]"
     case askForOptions = "params[ask_for_installation_options]"
     case clearDevEntity = "params[clear_developer_entity]"
     case disableProtectionChecks = "params[disable_protection_checks]"
+    case forceDisablePRO = "params[is_pro_disabled]"
     case signingIdentityType = "params[signing_identity_type]"
     case enterpriseCertId = "params[enterprise_cert_id]"
     case optedOutFromEmails = "params[is_opted_out_from_emails]"
