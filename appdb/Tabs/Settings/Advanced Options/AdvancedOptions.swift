@@ -3,7 +3,7 @@
 //  appdb
 //
 //  Created by ned on 13/10/2019.
-//  Copyright © 2019 ned. All rights reserved.
+//  Copyright Â© 2019 ned. All rights reserved.
 //
 
 import UIKit
@@ -20,9 +20,6 @@ class AdvancedOptions: TableViewController {
                 }, accessory: .disclosureIndicator, cellClass: SimpleStaticCell.self),
             StaticRow(text: "Disable Revocation Checks".localized(), accessory: .switchToggle(value: Preferences.disableRevocationChecks) { newValue in
                 API.setConfiguration(params: [.disableProtectionChecks: newValue ? "yes" : "no"], success: {}, fail: { _ in })
-            }, cellClass: SimpleStaticCell.self),
-            StaticRow(text: "Force Disable PRO".localized(), accessory: .switchToggle(value: Preferences.forceDisablePRO) { newValue in
-                API.setConfiguration(params: [.forceDisablePRO: newValue ? "yes" : "no"], success: {}, fail: { _ in })
             }, cellClass: SimpleStaticCell.self),
             StaticRow(text: "Opt-out from emails".localized(), accessory: .switchToggle(value: Preferences.optedOutFromEmails) { newValue in
                 API.setConfiguration(params: [.optedOutFromEmails: newValue ? "yes" : "no"], success: {}, fail: { _ in })
