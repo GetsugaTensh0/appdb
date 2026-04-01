@@ -3,7 +3,7 @@
 //  appdb
 //
 //  Created by ned on 10/11/2018.
-//  Copyright © 2018 ned. All rights reserved.
+//  Copyright Â© 2018 ned. All rights reserved.
 //
 
 import Alamofire
@@ -11,31 +11,24 @@ import SwiftyJSON
 
 extension API {
 
-    static func getUpdatesTicket(success: @escaping (_ ticket: String) -> Void, fail: @escaping (_ error: String) -> Void) {
-        AF.request(endpoint + Actions.getUpdatesTicket.rawValue, parameters: ["lang": languageCode], headers: headersWithCookie)
-            .responseJSON { response in
-                switch response.result {
-                case .success(let value):
-                    let json = JSON(value)
-                    if !json["success"].boolValue {
-                        fail(json["errors"][0]["translated"].stringValue)
-                    } else {
-                        success(json["data"].stringValue)
-                    }
-                case .failure(let error):
-                    fail(error.localizedDescription)
-                }
-            }
-    }
-
-    static func getUpdates(ticket: String, success: @escaping (_ items: [UpdateableApp]) -> Void, fail: @escaping (_ error: String, _ code: String) -> Void) {
-        let request = AF.request(endpoint + Actions.getUpdates.rawValue, parameters: ["t": ticket, "lang": languageCode], headers: headersWithCookie)
+    static func getUpdates(ticket: String = "", success: @escaping (_ items: [UpdateableApp]) -> Void, fail: @escaping (_ error: String, _ code: String) -> Void) {
+        var params: [String: Any] = ["lang": languageCode]
+        if !ticket.isEmpty { params["t"] = ticket }
+        let request = AF.request(endpoint + Actions.getUpdates.rawValue, parameters: params, headers: headersWithCookie)
 
         quickCheckForErrors(request, completion: { ok, hasError, errorCode in
             if ok {
-                request.responseArray(keyPath: "data") { (response: AFDataResponse<[UpdateableApp]>) in
+                request.responseJSON { response in
                     switch response.result {
-                    case .success(var items):
+                    case .success(let value):
+                        let json = JSON(value)
+                        let payload = json["data"].arrayValue.isEmpty ? json["data"]["items"] : json["data"]
+                        var items: [UpdateableApp] = []
+                        for entry in payload.arrayValue {
+                            if let mapped = UpdateableApp(JSONString: entry.rawString() ?? "") {
+                                items.append(mapped)
+                            }
+                        }
 
                         // Cleanup mismatch versions
                         for item in items {
