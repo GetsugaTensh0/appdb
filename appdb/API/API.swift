@@ -3,7 +3,7 @@
 //  appdb
 //
 //  Created by ned on 15/10/2016.
-//  Copyright © 2016 ned. All rights reserved.
+//  Copyright Â© 2016 ned. All rights reserved.
 //
 
 import Alamofire
@@ -11,7 +11,7 @@ import SwiftyJSON
 import Localize_Swift
 
 enum API {
-    static let endpoint = "https://api.dbservices.to/v1.6/"
+    static let endpoint = "https://api.dbservices.to/v1.7/"
     static let statusEndpoint = "https://status.dbservices.to/API/v1.0/"
     static let itmsHelperEndpoint = "https://dbservices.to/manifest.php"
 
@@ -97,10 +97,10 @@ enum Price: String, CaseIterable {
 }
 
 enum Actions: String {
-    case search = "search"
+    case search = "search_index"
     case listGenres = "list_genres"
     case promotions = "promotions"
-    case getLinks = "get_links"
+    case getLinks = "universal_gateway"
     case getPages = "get_pages"
     case newsCategory = "news"
     case link = "link"
@@ -131,7 +131,7 @@ enum Actions: String {
     case getAppdbAppsBundleIds = "get_appdb_apps_bundle_ids"
     case processRedirect = "process_redirect"
     case getAllDevices = "get_all_devices"
-    case getIpaCacheStatus = "get_ipa_cache_status"
+    case getIpaCacheStatus = "get_install_history"
     case installFromCache = "install_from_cache"
     case clearIpaCache = "clear_ipa_cache"
     case deleteIpaFromCache = "delete_ipa_from_cache"
@@ -143,9 +143,9 @@ enum Actions: String {
     case getPlusPurchaseOptions = "get_plus_purchase_options"
     case getSideloadingOptions = "get_sideloading_options"
     case getFeatures = "get_features"
-    case getDylibs = "get_dylibs"
-    case addDylib = "add_dylib"
-    case deleteDylib = "delete_dylib"
+    case getDylibs = "get_enhancements"
+    case addDylib = "add_enhancement"
+    case deleteDylib = "delete_enhancement"
     case getEnterpriseCerts = "get_enterprise_certs"
 }
 
