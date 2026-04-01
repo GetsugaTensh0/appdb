@@ -3,7 +3,7 @@
 //  appdb
 //
 //  Created by ned on 14/04/2018.
-//  Copyright © 2018 ned. All rights reserved.
+//  Copyright Â© 2018 ned. All rights reserved.
 //
 
 import UIKit
@@ -36,7 +36,6 @@ extension API {
 
                         let data = json["data"]
                         // checkRevocation(completion: { isRevoked, revokedOn in
-                            Preferences.set(.appsync, to: data["appsync"].stringValue == "yes")
                             Preferences.set(.ignoreCompatibility, to: data["ignore_compatibility"].stringValue == "yes")
                             Preferences.set(.askForInstallationOptions, to: data["ask_for_installation_options"].stringValue == "yes")
 
@@ -69,7 +68,6 @@ extension API {
                             Preferences.set(.plusSupportUri, to: data["plus_support_uri"].stringValue)
 
                             Preferences.set(.disableRevocationChecks, to: data["disable_protection_checks"].stringValue == "yes")
-                            Preferences.set(.forceDisablePRO, to: data["is_pro_disabled"].stringValue == "yes")
                             Preferences.set(.signingIdentityType, to: data["signing_identity_type"].stringValue)
                             Preferences.set(.optedOutFromEmails, to: data["is_opted_out_from_emails"].stringValue == "yes")
 
@@ -99,11 +97,9 @@ extension API {
                         // Update values
                         for (key, value) in params {
                             switch key {
-                            case .appsync: Preferences.set(.appsync, to: value == "yes")
                             case .askForOptions: Preferences.set(.askForInstallationOptions, to: value == "yes")
                             case .ignoreCompatibility: Preferences.set(.ignoreCompatibility, to: value == "yes")
                             case .disableProtectionChecks: Preferences.set(.disableRevocationChecks, to: value == "yes")
-                            case .forceDisablePRO: Preferences.set(.forceDisablePRO, to: value == "yes")
                             case .clearDevEntity: break
                             case .signingIdentityType: Preferences.set(.signingIdentityType, to: value)
                             case .enterpriseCertId: Preferences.set(.enterpriseCertId, to: value)
