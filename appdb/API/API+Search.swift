@@ -9,6 +9,7 @@
 import Alamofire
 import SwiftyJSON
 import ObjectMapper
+import Foundation
 
 extension API {
     private static func legacyId(from entry: JSON) -> Int {
