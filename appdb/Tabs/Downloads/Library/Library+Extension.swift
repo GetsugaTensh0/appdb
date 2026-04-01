@@ -3,7 +3,7 @@
 //  appdb
 //
 //  Created by ned on 02/05/2019.
-//  Copyright © 2019 ned. All rights reserved.
+//  Copyright Â© 2019 ned. All rights reserved.
 //
 
 import Foundation
@@ -269,12 +269,28 @@ extension Library {
             setButtonTitle("Requesting...")
 
             func install(_ additionalOptions: [AdditionalInstallationParameters: Any] = [:]) {
-                API.install(id: sender.linkId, type: .myAppstore, additionalOptions: additionalOptions) { [weak self] error in
+                let app = self.myAppstoreIpas[sender.tag]
+                let installId = app.universalObjectIdentifier.isEmpty ? sender.linkId : app.universalObjectIdentifier
+                API.install(id: installId, type: .myAppstore, additionalOptions: additionalOptions) { [weak self] error in
                     guard let self = self else { return }
 
                     if let error = error {
-                        Messages.shared.showError(message: error.prettified)
-                        delay(0.3) { setButtonTitle("Install") }
+                        if !app.link.isEmpty {
+                            API.customInstall(ipaUrl: app.link, type: .ios, iconUrl: "", bundleId: app.bundleId, name: app.name, additionalOptions: additionalOptions) { fallbackError in
+                                if let fallbackError = fallbackError {
+                                    Messages.shared.showError(message: fallbackError.prettified)
+                                    delay(0.3) { setButtonTitle("Install") }
+                                } else {
+                                    setButtonTitle("Requested")
+                                    Messages.shared.showSuccess(message: "Installation has been queued to your device".localized())
+                                    ObserveQueuedApps.shared.addApp(type: .myAppstore, linkId: installId, name: app.name, image: "", bundleId: app.bundleId)
+                                    delay(5) { setButtonTitle("Install") }
+                                }
+                            }
+                        } else {
+                            Messages.shared.showError(message: error.prettified)
+                            delay(0.3) { setButtonTitle("Install") }
+                        }
                     } else {
                         setButtonTitle("Requested")
 
@@ -282,7 +298,7 @@ extension Library {
 
                         Messages.shared.showSuccess(message: "Installation has been queued to your device".localized())
 
-                        ObserveQueuedApps.shared.addApp(type: .myAppstore, linkId: sender.linkId, name: self.myAppstoreIpas[sender.tag].name, image: "", bundleId: self.myAppstoreIpas[sender.tag].bundleId)
+                        ObserveQueuedApps.shared.addApp(type: .myAppstore, linkId: installId, name: app.name, image: "", bundleId: app.bundleId)
 
                         delay(5) { setButtonTitle("Install") }
                     }
@@ -507,7 +523,7 @@ extension Library: UICollectionViewDelegateFlowLayout {
     }
 
     @objc private func showHelpMyAppStore() {
-        let message = "appdb presents MyAppStore - your own AppStore. A brand new custom app installer transformed into your personal IPA library!\n\n• Save your personal apps to appdb\n• Shared across all your devices under the same email\n• Store apps up to 4GB\n• Upload multiple apps at once\n\nTo get started, click on a local IPA and select 'Upload to MyAppStore'".localized()
+        let message = "appdb presents MyAppStore - your own AppStore. A brand new custom app installer transformed into your personal IPA library!\n\nâ€¢ Save your personal apps to appdb\nâ€¢ Shared across all your devices under the same email\nâ€¢ Store apps up to 4GB\nâ€¢ Upload multiple apps at once\n\nTo get started, click on a local IPA and select 'Upload to MyAppStore'".localized()
         let alertController = UIAlertController(title: "MyAppStore", message: message, preferredStyle: .alert, adaptive: true)
         let okAction = UIAlertAction(title: "OK".localized(), style: .cancel)
         alertController.addAction(okAction)
