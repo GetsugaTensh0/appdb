@@ -3,7 +3,7 @@
 //  appdb
 //
 //  Created by ned on 11/01/2017.
-//  Copyright © 2017 ned. All rights reserved.
+//  Copyright Â© 2017 ned. All rights reserved.
 //
 
 import Alamofire
@@ -28,22 +28,25 @@ extension API {
                     genres.append(Genre(category: "cydia", id: "0", name: "All Categories".localized()))
                     genres.append(Genre(category: "books", id: "0", name: "All Categories".localized()))
 
+                    // API 1.7 exposes `official` genres; mirror across legacy tabs.
+                    let officialGenres = data["official"].arrayValue
+
                     // Cydia genres
-                    for value in data["cydia"].arrayValue {
+                    for value in officialGenres {
                         genres.append(
                             Genre(category: "cydia", id: value["id"].intValue.description, name: value["name"].stringValue, amount: value["content_amount"].stringValue)
                         )
                     }
 
                     // iOS Genres
-                    for value in data["ios"].arrayValue {
+                    for value in officialGenres {
                         genres.append(
                             Genre(category: "ios", id: value["id"].stringValue, name: value["name"].stringValue, amount: value["content_amount"].stringValue)
                         )
                     }
 
                     // Books Genres
-                    for value in data["books"].arrayValue {
+                    for value in officialGenres {
                         genres.append(
                             Genre(category: "books", id: value["id"].stringValue, name: value["name"].stringValue, amount: value["content_amount"].stringValue)
                         )
@@ -89,12 +92,13 @@ extension API {
     }
 
     static func getIcon(id: String, type: ItemType, completion: @escaping (String) -> Void) {
-        AF.request(endpoint + Actions.search.rawValue, parameters: ["type": type.rawValue, "genre": id, "order": Order.all.rawValue, "lang": languageCode], headers: headers)
+        AF.request(endpoint + Actions.search.rawValue, parameters: ["genre": id, "order": Order.all.rawValue, "length": 1, "start": 0, "lang": languageCode], headers: headers)
             .responseJSON { response in
                 switch response.result {
                 case .success(let value):
                     let json = JSON(value)
-                    completion(json["data"][0]["image"].stringValue)
+                    let icon = json["data"][0]["icon_uri"].stringValue
+                    completion(icon.isEmpty ? json["data"][0]["image"].stringValue : icon)
                 case .failure:
                     completion("")
                 }
