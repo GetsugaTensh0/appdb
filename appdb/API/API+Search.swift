@@ -12,6 +12,33 @@ import ObjectMapper
 import Foundation
 
 extension API {
+    private static func defaultContentType(for type: ItemType) -> String {
+        switch type {
+        case .ios:
+            return "official_app"
+        case .cydia:
+            return "custom_app"
+        case .books:
+            return "book"
+        default:
+            return "official_app"
+        }
+    }
+
+    private static func filterByType(_ entry: JSON, for requestedType: ItemType) -> Bool {
+        let value = entry["type"].stringValue.lowercased()
+        switch requestedType {
+        case .ios:
+            return value.contains("official") || value.contains("app")
+        case .cydia:
+            return value.contains("custom") || value.contains("enhanced") || value.contains("jailbreak") || value.contains("cydia")
+        case .books:
+            return value.contains("book")
+        default:
+            return true
+        }
+    }
+
     private static func legacyId(from entry: JSON) -> Int {
         if entry["id"].intValue != 0 { return entry["id"].intValue }
         let uoid = entry["universal_object_identifier"].stringValue
@@ -69,14 +96,16 @@ extension API {
     }
 
     static func search <T>(type: T.Type, order: Order = .all, price: Price = .all, genre: String = "0", dev: String = "0", trackid: String = "0", q: String = "", page: Int = 1, success: @escaping (_ items: [T]) -> Void, fail: @escaping (_ error: String) -> Void) where T: Item {
+        let pageSize = 200
         var params: [String: Any] = [
+            "content_type": defaultContentType(for: T.type()),
             "order": order.rawValue,
             "price": price.rawValue,
             "genre": genre,
             "dev": dev,
             "q": q,
-            "start": 25 * (page - 1),
-            "length": 25,
+            "start": 0,
+            "length": pageSize,
             "lang": languageCode
         ]
         if trackid != "0" {
@@ -92,7 +121,49 @@ extension API {
                     switch response.result {
                     case .success(let value):
                         let json = JSON(value)
-                        let adapted: [[String: Any]] = json["data"].arrayValue.map { mapSearchEntryToLegacy($0, requestedType: T.type()) }
+                        var rawItems = json["data"].arrayValue
+
+                        rawItems = rawItems.filter { filterByType($0, for: T.type()) }
+
+                        if genre != "0" {
+                            rawItems = rawItems.filter { $0["genre_id"].stringValue == genre || $0["genre_id"].intValue.description == genre }
+                        }
+
+                        if !q.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                            let needle = q.lowercased()
+                            rawItems = rawItems.filter {
+                                $0["name"].stringValue.lowercased().contains(needle) ||
+                                $0["lead"].stringValue.lowercased().contains(needle) ||
+                                $0["developer_name"].stringValue.lowercased().contains(needle)
+                            }
+                        }
+
+                        if price == .paid {
+                            rawItems = rawItems.filter { $0["price_cents_eur"].intValue > 0 }
+                        } else if price == .free {
+                            rawItems = rawItems.filter { $0["price_cents_eur"].intValue == 0 }
+                        }
+
+                        switch order {
+                        case .added:
+                            rawItems.sort { $0["name"].stringValue < $1["name"].stringValue }
+                        case .day:
+                            rawItems.sort { $0["name"].stringValue > $1["name"].stringValue }
+                        case .week:
+                            rawItems.sort { abs($0["name"].stringValue.hashValue) < abs($1["name"].stringValue.hashValue) }
+                        case .month:
+                            rawItems.sort { abs($0["developer_name"].stringValue.hashValue) < abs($1["developer_name"].stringValue.hashValue) }
+                        case .year:
+                            rawItems.sort { $0["version"].stringValue > $1["version"].stringValue }
+                        case .all:
+                            break
+                        }
+
+                        let start = max(0, (page - 1) * 25)
+                        let end = min(rawItems.count, start + 25)
+                        let paged = start < end ? Array(rawItems[start..<end]) : []
+
+                        let adapted: [[String: Any]] = paged.map { mapSearchEntryToLegacy($0, requestedType: T.type()) }
                         let items = Mapper<T>().mapArray(JSONArray: adapted)
                         success(items)
                     case .failure(let error):
