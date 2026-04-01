@@ -3,7 +3,7 @@
 //  appdb
 //
 //  Created by ned on 13/03/2018.
-//  Copyright © 2018 ned. All rights reserved.
+//  Copyright Â© 2018 ned. All rights reserved.
 //
 
 import UIKit
@@ -67,39 +67,30 @@ class Updates: LoadingTableView {
         }
     }
 
-    // get update ticket -> check updates -> update UI
+    // fetch updates and update UI
 
     func checkUpdates() {
         isLoading = true
         if Preferences.deviceIsLinked {
-            API.getUpdatesTicket(success: { [weak self] ticket in
+            self.getUpdates("", done: { [weak self] error in
                 guard let self = self else { return }
 
-                self.getUpdates(ticket, done: { [weak self] error in
-                    guard let self = self else { return }
+                if let error = error {
+                    self.cleanup()
+                    self.showErrorMessage(text: "Cannot connect".localized(), secondaryText: error, animated: self.animated)
+                } else {
+                    self.isLoading = false
+                    self.tableView.spr_endRefreshing()
+                    self.updateBadge()
+                    self.navigationItem.rightBarButtonItem?.isEnabled = true
 
-                    if let error = error {
-                        self.cleanup()
-                        self.showErrorMessage(text: "Cannot connect".localized(), secondaryText: error, animated: self.animated)
+                    if self.updateableApps.isEmpty && self.nonUpdateableApps.isEmpty {
+                        self.tableView.reloadData()
+                        self.showErrorMessage(text: "No updates found".localized(), animated: self.animated)
                     } else {
-                        self.isLoading = false
-                        self.tableView.spr_endRefreshing()
-                        self.updateBadge()
-                        self.navigationItem.rightBarButtonItem?.isEnabled = true
-
-                        if self.updateableApps.isEmpty && self.nonUpdateableApps.isEmpty {
-                            self.tableView.reloadData()
-                            self.showErrorMessage(text: "No updates found".localized(), animated: self.animated)
-                        } else {
-                            self.state = .done
-                        }
+                        self.state = .done
                     }
-                })
-            }, fail: { [weak self] error in
-                guard let self = self else { return }
-
-                self.cleanup()
-                self.showErrorMessage(text: "Cannot connect".localized(), secondaryText: error, animated: false)
+                }
             })
         } else {
             self.cleanup()
