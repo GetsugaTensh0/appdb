@@ -3,7 +3,7 @@
 //  appdb
 //
 //  Created by ned on 18/03/2017.
-//  Copyright © 2017 ned. All rights reserved.
+//  Copyright Â© 2017 ned. All rights reserved.
 //
 
 import UIKit
@@ -13,7 +13,7 @@ import SwiftyJSON
 extension API {
 
     static func getLinks(type: ItemType, trackid: String, success: @escaping (_ items: [Version]) -> Void, fail: @escaping (_ error: String) -> Void) {
-        AF.request(endpoint + Actions.getLinks.rawValue, parameters: ["type": type.rawValue, "trackids": trackid, "lang": languageCode], headers: headersWithCookie)
+        AF.request(endpoint + Actions.getLinks.rawValue, parameters: ["type": type.rawValue, "trackids": trackid, "trackid": trackid, "id": trackid, "uoid": trackid, "lang": languageCode], headers: headersWithCookie)
             .responseJSON { response in
                 switch response.result {
                 case .success(let value):
@@ -106,20 +106,10 @@ extension API {
     }
 
     static func reportLink(id: String, type: ItemType, reason: String, completion: @escaping (_ error: String?) -> Void) {
-        AF.request(endpoint + Actions.report.rawValue, parameters: ["type": type.rawValue, "id": id, "reason": reason, "lang": languageCode], headers: headersWithCookie)
-            .responseJSON { response in
-                switch response.result {
-                case .success(let value):
-                    let json = JSON(value)
-                    if !json["success"].boolValue {
-                        completion(json["errors"][0]["translated"].stringValue)
-                    } else {
-                        completion(nil)
-                    }
-                case .failure(let error):
-                    completion(error.localizedDescription)
-                }
-            }
+        _ = id
+        _ = type
+        _ = reason
+        completion("Link reporting endpoint was removed in API v1.7".localized())
     }
 
     static func getRedirectionTicket(t: String, completion: @escaping (_ error: String?, _ rt: String?, _ wait: Int?) -> Void) {
