@@ -3,7 +3,7 @@
 //  appdb
 //
 //  Created by stev3fvcks on 26.03.23.
-//  Copyright © 2023 stev3fvcks. All rights reserved.
+//  Copyright Â© 2023 stev3fvcks. All rights reserved.
 //
 
 import UIKit
@@ -17,7 +17,7 @@ class CachedIPAs: LoadingTableView {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        self.title = "Cached IPAs".localized()
+        self.title = "Install History".localized()
 
         setUp()
 
@@ -45,7 +45,7 @@ class CachedIPAs: LoadingTableView {
 
                 if self.cachedIPAs.isEmpty {
                     self.tableView.reloadData()
-                    self.showErrorMessage(text: "No cached IPAs found".localized(), animated: self.animated)
+                    self.showErrorMessage(text: "No install history found".localized(), animated: self.animated)
                 } else {
                     self.state = .done
                 }
@@ -97,19 +97,7 @@ class CachedIPAs: LoadingTableView {
     }
 
     override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
-        true
-    }
-
-    override func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath) -> [UITableViewRowAction]? {
-
-        [UITableViewRowAction(style: .destructive, title: "Delete".localized(), handler: { _, indexPath in
-            let item = self.cachedIPAs[indexPath.row]
-
-            API.deleteIpaFromCache(bundleId: item.bundleId) {
-                Messages.shared.showSuccess(message: "The cached IPA was deleted successfully".localized(), context: .viewController(self))
-                self.loadCachedIPAs()
-            }
-        })]
+        false
     }
 
     // Reload data on rotation to update ElasticLabel text
