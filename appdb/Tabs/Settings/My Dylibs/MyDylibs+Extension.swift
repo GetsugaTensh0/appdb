@@ -3,7 +3,7 @@
 //  appdb
 //
 //  Created by stev3fvcks on 19.03.23.
-//  Copyright © 2023 stev3fvcks. All rights reserved.
+//  Copyright Â© 2023 stev3fvcks. All rights reserved.
 //
 
 import UIKit
@@ -89,9 +89,9 @@ extension MyDylibs {
     }*/
 
     func addDylibFromUrl() {
-        let alertController = UIAlertController(title: "Please enter URL to .dylib/.deb/.framework.zip".localized(), message: nil, preferredStyle: .alert, adaptive: true)
+        let alertController = UIAlertController(title: "Please enter enhancement URL".localized(), message: nil, preferredStyle: .alert, adaptive: true)
         alertController.addTextField { textField in
-            textField.placeholder = "Dylib URL".localized()
+            textField.placeholder = "Enhancement URL".localized()
             textField.theme_keyboardAppearance = [.light, .dark, .dark]
             textField.keyboardType = .URL
             //textField.addTarget(self, action: #selector(self.repoUrlTextfieldTextChanged(sender:)), for: .editingChanged)
@@ -99,13 +99,13 @@ extension MyDylibs {
         }
         alertController.addAction(UIAlertAction(title: "Cancel".localized(), style: .cancel))
 
-        let addAction = UIAlertAction(title: "Add .dylib/.deb/.framework.zip".localized(), style: .default, handler: { _ in
+        let addAction = UIAlertAction(title: "Add enhancement".localized(), style: .default, handler: { _ in
             guard let text = alertController.textFields?[0].text else { return }
             API.addDylib(url: text) {
-                Messages.shared.showSuccess(message: "Dylib was added successfully".localized(), context: .viewController(self))
+                Messages.shared.showSuccess(message: "Enhancement added successfully".localized(), context: .viewController(self))
                 self.loadDylibs()
             } fail: { error in
-                Messages.shared.showError(message: "An error occurred while adding the new dylib".localized(), context: .viewController(self))
+                Messages.shared.showError(message: error.prettified, context: .viewController(self))
             }
         })
         alertController.addAction(addAction)
