@@ -3,7 +3,7 @@
 //  appdb
 //
 //  Created by ned on 19/02/2017.
-//  Copyright Â© 2017 ned. All rights reserved.
+//  Copyright Ã‚Â© 2017 ned. All rights reserved.
 //
 
 import UIKit
@@ -163,7 +163,7 @@ class Details: LoadingTableView {
                 // Otherwise, just return static cells
                 return details[indexPath.row]
             case .reviews:
-                if indexPath.row == content.itemReviews.count { return DetailsPublisher("Reviews are from Apple's iTunes Store Â©".localized()) }
+                if indexPath.row == content.itemReviews.count { return DetailsPublisher("Reviews are from Apple's iTunes Store Ã‚Â©".localized()) }
                 if let cell = tableView.dequeueReusableCell(withIdentifier: "review", for: indexPath) as? DetailsReview {
                     cell.desc.collapsed = reviewCollapsedForIndexPath[indexPath] ?? true
                     cell.configure(with: content.itemReviews[indexPath.row])
@@ -183,12 +183,14 @@ class Details: LoadingTableView {
                         guard let cell = tableView.dequeueReusableCell(withIdentifier: "downloadUnified", for: indexPath) as? DetailsDownloadUnified else { return UITableViewCell() }
                         cell.accessoryType = shouldHideDisclosureIndicator ? .none : .disclosureIndicator
                         cell.configure(with: link, installEnabled: true)
+                        cell.button.linkId = content.itemUoid.isEmpty ? link.id : content.itemUoid
                         cell.button.addTarget(self, action: #selector(self.install), for: .touchUpInside)
                         return cell
                     } else {
                         guard let cell = tableView.dequeueReusableCell(withIdentifier: "download", for: indexPath) as? DetailsDownload else { return UITableViewCell() }
                         cell.accessoryType = shouldHideDisclosureIndicator ? .none : .disclosureIndicator
                         cell.configure(with: link, installEnabled: true)
+                        cell.button.linkId = content.itemUoid.isEmpty ? link.id : content.itemUoid
                         cell.button.addTarget(self, action: #selector(self.install), for: .touchUpInside)
                         return cell
                     }
@@ -295,8 +297,9 @@ class Details: LoadingTableView {
             setButtonTitle("Requesting...")
 
             func install(_ additionalOptions: [AdditionalInstallationParameters: Any] = [:]) {
+                let installId = self.content.itemUoid.isEmpty ? sender.linkId : self.content.itemUoid
 
-                API.install(id: sender.linkId, type: self.contentType, additionalOptions: additionalOptions) { [weak self] error in
+                API.install(id: installId, type: self.contentType, additionalOptions: additionalOptions) { [weak self] error in
                     guard let self = self else { return }
 
                     if let error = error {
@@ -312,7 +315,7 @@ class Details: LoadingTableView {
                         Messages.shared.showSuccess(message: "Installation has been queued to your device".localized(), context: .viewController(self))
 
                         if self.contentType != .books {
-                            ObserveQueuedApps.shared.addApp(type: self.contentType, linkId: sender.linkId,
+                            ObserveQueuedApps.shared.addApp(type: self.contentType, linkId: installId,
                                                             name: self.content.itemName, image: self.content.itemIconUrl,
                                                             bundleId: self.content.itemBundleId)
                         }
