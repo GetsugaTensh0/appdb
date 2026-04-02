@@ -29,7 +29,6 @@ class MyAppStoreApp: Item {
     var version: String = ""
     var uploadedAt: String = ""
     var size: String = ""
-    var universalObjectIdentifier: String = ""
     var link: String = ""
 
     override func mapping(map: Map) {
