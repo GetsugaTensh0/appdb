@@ -3,7 +3,7 @@
 //  appdb
 //
 //  Created by ned on 26/04/2019.
-//  Copyright Â© 2019 ned. All rights reserved.
+//  Copyright Ã‚Â© 2019 ned. All rights reserved.
 //
 
 import UIKit
@@ -18,7 +18,13 @@ class MyAppStoreCell: UICollectionViewCell {
     func configure(with app: MyAppStoreApp) {
         name.text = app.name + " (\(app.version))"
         bundleId.text = app.bundleId
-        installButton.linkId = app.universalObjectIdentifier.isEmpty ? app.id.description : app.universalObjectIdentifier
+        if !app.apiIdentifier.isEmpty {
+            installButton.linkId = app.apiIdentifier
+        } else if !app.universalObjectIdentifier.isEmpty {
+            installButton.linkId = app.universalObjectIdentifier
+        } else {
+            installButton.linkId = String(app.id)
+        }
     }
 
     required init?(coder aDecoder: NSCoder) {
