@@ -3,7 +3,7 @@
 //  appdb
 //
 //  Created by ned on 12/10/2016.
-//  Copyright © 2016 ned. All rights reserved.
+//  Copyright Â© 2016 ned. All rights reserved.
 //
 
 import UIKit
@@ -80,6 +80,10 @@ class Book: Item {
         description_ <- map["description"]
         artistId <- map["artist_id"]
         lastParseItunes <- map["last_parse_itunes"]
+        universalObjectIdentifier <- map["universal_object_identifier"]
+        if universalObjectIdentifier.isEmpty {
+            universalObjectIdentifier <- map["uoid"]
+        }
 
         if let data = lastParseItunes.data(using: .utf8), let itunesParse = try? JSON(data: data) {
             // Information
