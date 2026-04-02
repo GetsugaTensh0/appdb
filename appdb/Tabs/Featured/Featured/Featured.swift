@@ -3,7 +3,7 @@
 //  appdb
 //
 //  Created by ned on 11/10/2016.
-//  Copyright © 2016 ned. All rights reserved.
+//  Copyright Â© 2016 ned. All rights reserved.
 //
 
 import UIKit
@@ -24,13 +24,9 @@ protocol ContentRedirection: AnyObject {
 class Featured: LoadingTableView, UIPopoverPresentationControllerDelegate {
 
     let cells: [FeaturedCell] = [
-        ItemCollection(id: .cydia, title: "Custom Apps".localized(), fullSeparator: true),
-        Dummy(),
         ItemCollection(id: .iosNew, title: "New and Noteworthy".localized()),
         ItemCollection(id: .iosPaid, title: "Top Paid".localized()),
         ItemCollection(id: .iosPopular, title: "Popular This Week".localized(), fullSeparator: true),
-        Dummy(),
-        ItemCollection(id: .books, title: "Top Books".localized(), fullSeparator: true),
         Copyright()
     ]
 
