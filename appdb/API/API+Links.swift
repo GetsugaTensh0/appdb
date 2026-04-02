@@ -20,6 +20,12 @@ extension API {
 
                     let json = JSON(value)
                     let data = json["data"]
+                    let trackData: JSON = {
+                        if !data[trackid].isEmpty { return data[trackid] }
+                        if !data["items"][trackid].isEmpty { return data["items"][trackid] }
+                        if !data["items"].isEmpty { return data["items"] }
+                        return data
+                    }()
                     var versions: [Version] = []
 
                     let queue = DispatchQueue(label: "it.ned.links_\(trackid)", attributes: .concurrent)
@@ -27,7 +33,7 @@ extension API {
                     queue.async {
                         // No multiple keys for books
                         if type == .books {
-                            let fetched: JSON = data[trackid][0]
+                            let fetched: JSON = trackData[0]
                             if !fetched.isEmpty {
                                 var version = Version(number: Global.tilde)
                                 for e in 0..<fetched.count {
@@ -56,24 +62,16 @@ extension API {
                                 }; versions.append(version)
                             }
                         } else {
-                            var keys: [String] = []
-                            for (key, _) in data[trackid] where !data[trackid][key].isEmpty {
-                                keys.append(key)
-                            }
-
-                            keys.sort { $0.compare($1, options: .numeric) == .orderedDescending }
-
-                            for key in keys {
-                                var version = Version(number: key), fetched: JSON = data[trackid][key]
-                                for e in 0..<fetched.count {
-                                    let link: JSON = fetched[e]
+                            if let flatLinks = trackData.array, !flatLinks.isEmpty, flatLinks.first?["link"].exists() == true {
+                                var version = Version(number: Global.tilde)
+                                for link in flatLinks {
                                     var incompatibility_reason: String = ""
                                     if link["is_compatible"]["reason"].exists() {
                                         incompatibility_reason = link["is_compatible"]["reason"].stringValue
                                     }
                                     var report_reason: String = ""
-                                    if !link["reports"].isEmpty && link["reports"].arrayValue.first!["reason"].exists() {
-                                        report_reason = link["reports"].arrayValue.first!["reason"].stringValue
+                                    if !link["reports"].isEmpty && link["reports"].arrayValue.first?["reason"].exists() == true {
+                                        report_reason = link["reports"].arrayValue.first?["reason"].stringValue ?? ""
                                     }
                                     version.links.append(Link(
                                         link: link["link"].stringValue,
@@ -91,6 +89,45 @@ extension API {
                                     ))
                                 }
                                 versions.append(version)
+                            }
+
+                            if versions.isEmpty {
+                                var keys: [String] = []
+                                for (key, _) in trackData where !trackData[key].isEmpty {
+                                    keys.append(key)
+                                }
+
+                                keys.sort { $0.compare($1, options: .numeric) == .orderedDescending }
+
+                                for key in keys {
+                                    var version = Version(number: key), fetched: JSON = trackData[key]
+                                    for e in 0..<fetched.count {
+                                        let link: JSON = fetched[e]
+                                        var incompatibility_reason: String = ""
+                                        if link["is_compatible"]["reason"].exists() {
+                                            incompatibility_reason = link["is_compatible"]["reason"].stringValue
+                                        }
+                                        var report_reason: String = ""
+                                        if !link["reports"].isEmpty && link["reports"].arrayValue.first!["reason"].exists() {
+                                            report_reason = link["reports"].arrayValue.first!["reason"].stringValue
+                                        }
+                                        version.links.append(Link(
+                                            link: link["link"].stringValue,
+                                            cracker: link["cracker"].stringValue,
+                                            uploader: link["uploader_name"].stringValue,
+                                            host: link["host"].stringValue,
+                                            id: link["id"].stringValue,
+                                            verified: link["verified"].boolValue,
+                                            di_compatible: link["di_compatible"].intValue == 1,
+                                            hidden: link["is_hidden"] != "0",
+                                            is_compatible: link["is_compatible"]["result"] == "yes",
+                                            isTicket: link["link"].stringValue.starts(with: "ticket://"),
+                                            incompatibility_reason: incompatibility_reason,
+                                            report_reason: report_reason
+                                        ))
+                                    }
+                                    versions.append(version)
+                                }
                             }
                         }
 
