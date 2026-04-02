@@ -3,7 +3,7 @@
 //  appdb
 //
 //  Created by ned on 10/11/2018.
-//  Copyright © 2018 ned. All rights reserved.
+//  Copyright Â© 2018 ned. All rights reserved.
 //
 
 import UIKit
@@ -19,7 +19,8 @@ struct UpdateableApp: Equatable {
     var versionOld: String = ""
     var versionNew: String = ""
     var alongsideId: String = ""
-    var trackid: Int = 0
+    var trackid: String = ""
+    var uoid: String = ""
     var image: String = ""
     var updateable = 0
     var type: String = ""
@@ -28,7 +29,7 @@ struct UpdateableApp: Equatable {
     var date: String = ""
 
     var isIgnored: Bool {
-        !Preferences.ignoredUpdateableApps.filter({ $0.trackid == String(trackid) }).isEmpty
+        !Preferences.ignoredUpdateableApps.filter({ $0.trackid == trackid }).isEmpty
     }
 
     static func == (lhs: UpdateableApp, rhs: UpdateableApp) -> Bool {
@@ -43,6 +44,7 @@ extension UpdateableApp: Mappable {
         versionNew <- map["version_new"]
         alongsideId <- map["alongside_id"]
         trackid <- map["trackid"]
+        uoid <- map["uoid"]
         image <- map["image"]
         updateable <- map["updateable"]
         type <- map["type"]
@@ -50,6 +52,18 @@ extension UpdateableApp: Mappable {
         whatsnew <- map["whatsnew"]
         date <- map["added"]
 
-        itemType = type == "ios" ? .ios : .cydia
+        if trackid.isEmpty { trackid <- map["id"] }
+        if trackid.isEmpty { trackid <- map["universal_object_identifier"] }
+        if trackid.isEmpty { trackid = uoid }
+
+        if type.isEmpty { type <- map["content_type"] }
+        let normalizedType = type.lowercased()
+        if normalizedType.contains("book") {
+            itemType = .books
+        } else if normalizedType.contains("custom") || normalizedType.contains("cydia") || normalizedType.contains("enhancement") {
+            itemType = .cydia
+        } else {
+            itemType = .ios
+        }
     }
 }
