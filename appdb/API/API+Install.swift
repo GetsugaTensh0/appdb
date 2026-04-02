@@ -3,7 +3,7 @@
 //  appdb
 //
 //  Created by ned on 28/09/2018.
-//  Copyright Â© 2018 ned. All rights reserved.
+//  Copyright Ã‚Â© 2018 ned. All rights reserved.
 //
 
 import UIKit
@@ -25,19 +25,46 @@ extension API {
     }
 
     static func install(id: String, type: ItemType, additionalOptions: [AdditionalInstallationParameters: Any] = [:], completion: @escaping (_ error: String?) -> Void) {
-        var parameters: [String: Any] = ["id": id, "uoid": id, "lang": languageCode]
-        for (key, value) in additionalOptions { parameters[key.rawValue] = value }
+        _ = type
+        var uoidParameters: [String: Any] = ["uoid": id, "lang": languageCode]
+        for (key, value) in additionalOptions { uoidParameters[key.rawValue] = value }
 
-        AF.request(endpoint + Actions.install.rawValue, parameters: parameters, headers: headersWithCookie)
-            .responseJSON { response in
-                switch response.result {
-                case .success(let value):
-                    let json = JSON(value)
-                    if !json["success"].boolValue {
-                        completion(json["errors"][0]["translated"].stringValue)
-                    } else {
+        AF.request(endpoint + Actions.install.rawValue, parameters: uoidParameters, headers: headersWithCookie)
+            .responseJSON { firstResponse in
+                switch firstResponse.result {
+                case .success(let firstValue):
+                    let firstJson = JSON(firstValue)
+                    if firstJson["success"].boolValue {
                         completion(nil)
+                        return
                     }
+
+                    let firstError = firstJson["errors"][0]["translated"].stringValue
+                    let lowered = firstError.lowercased()
+                    let shouldTryLegacyId = lowered.contains("not supported") || lowered.contains("unsupported") || lowered.contains("invalid")
+
+                    if !shouldTryLegacyId {
+                        completion(firstError)
+                        return
+                    }
+
+                    var legacyParameters: [String: Any] = ["id": id, "lang": languageCode]
+                    for (key, value) in additionalOptions { legacyParameters[key.rawValue] = value }
+
+                    AF.request(endpoint + Actions.install.rawValue, parameters: legacyParameters, headers: headersWithCookie)
+                        .responseJSON { secondResponse in
+                            switch secondResponse.result {
+                            case .success(let secondValue):
+                                let secondJson = JSON(secondValue)
+                                if secondJson["success"].boolValue {
+                                    completion(nil)
+                                } else {
+                                    completion(secondJson["errors"][0]["translated"].stringValue)
+                                }
+                            case .failure(let error):
+                                completion(error.localizedDescription)
+                            }
+                        }
                 case .failure(let error):
                     completion(error.localizedDescription)
                 }
