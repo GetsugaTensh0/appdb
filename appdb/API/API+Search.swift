@@ -138,6 +138,14 @@ extension API {
                             }
                         }
 
+                        if trackid != "0" {
+                            rawItems = rawItems.filter {
+                                $0["universal_object_identifier"].stringValue == trackid ||
+                                $0["id"].stringValue == trackid ||
+                                $0["trackid"].stringValue == trackid
+                            }
+                        }
+
                         if price == .paid {
                             rawItems = rawItems.filter { $0["price_cents_eur"].intValue > 0 }
                         } else if price == .free {
