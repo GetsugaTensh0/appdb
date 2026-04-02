@@ -29,6 +29,7 @@ class MyAppStoreApp: Item {
     var version: String = ""
     var uploadedAt: String = ""
     var size: String = ""
+    var apiIdentifier: String = ""
     var link: String = ""
 
     override func mapping(map: Map) {
@@ -38,11 +39,18 @@ class MyAppStoreApp: Item {
         version <- map["bundle_version"]
         uploadedAt <- map["uploaded_at"]
         size <- map["size"]
+        apiIdentifier <- map["id"]
         universalObjectIdentifier <- map["universal_object_identifier"]
         link <- map["link"]
 
         if universalObjectIdentifier.isEmpty {
             universalObjectIdentifier <- map["uoid"]
+        }
+        if apiIdentifier.isEmpty {
+            apiIdentifier <- map["uoid"]
+        }
+        if apiIdentifier.isEmpty {
+            apiIdentifier = universalObjectIdentifier
         }
         if link.isEmpty {
             link <- map["download_link"]
