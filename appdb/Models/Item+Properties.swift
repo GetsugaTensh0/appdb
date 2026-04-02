@@ -3,7 +3,7 @@
 //  appdb
 //
 //  Created by ned on 02/10/2018.
-//  Copyright © 2018 ned. All rights reserved.
+//  Copyright Â© 2018 ned. All rights reserved.
 //
 
 import UIKit
@@ -12,6 +12,12 @@ import UIKit
 // Content Properties
 //
 extension Item {
+    var itemUoid: String {
+        if let app = self as? App { return app.universalObjectIdentifier }
+        if let cydiaApp = self as? CydiaApp { return cydiaApp.universalObjectIdentifier }
+        if let book = self as? Book { return book.universalObjectIdentifier }
+        return universalObjectIdentifier
+    }
 
     var itemId: String {
         if let app = self as? App { return app.id.description }
