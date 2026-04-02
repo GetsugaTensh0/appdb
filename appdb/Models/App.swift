@@ -3,7 +3,7 @@
 //  appdb
 //
 //  Created by ned on 12/10/2016.
-//  Copyright © 2016 ned. All rights reserved.
+//  Copyright Â© 2016 ned. All rights reserved.
 //
 
 import UIKit
@@ -99,6 +99,10 @@ class App: Item {
         website <- map["pwebsite"]
         support <- map["psupport"]
         pname <- map["pname"]
+        universalObjectIdentifier <- map["universal_object_identifier"]
+        if universalObjectIdentifier.isEmpty {
+            universalObjectIdentifier <- map["uoid"]
+        }
 
         // Information
 
@@ -129,7 +133,7 @@ class App: Item {
                 category = Category(name: genre.name, id: genre.id)
             }
             seller = pname
-            publisher = "© " + pname
+            publisher = "Â© " + pname
         }
 
         // Screenshots
