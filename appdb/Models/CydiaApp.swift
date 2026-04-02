@@ -3,7 +3,7 @@
 //  appdb
 //
 //  Created by ned on 12/10/2016.
-//  Copyright © 2016 ned. All rights reserved.
+//  Copyright Â© 2016 ned. All rights reserved.
 //
 
 import SwiftyJSON
@@ -80,6 +80,10 @@ class CydiaApp: Item {
         originalTrackid <- map["original_trackid"]
         originalSection <- map["original_section"]
         screenshotsData <- map["screenshots"]
+        universalObjectIdentifier <- map["universal_object_identifier"]
+        if universalObjectIdentifier.isEmpty {
+            universalObjectIdentifier <- map["uoid"]
+        }
 
         isTweaked = originalTrackid != 0
         if developer.hasSuffix(" ") { developer = String(developer.dropLast()) }
