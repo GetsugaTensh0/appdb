@@ -3,7 +3,7 @@
 //  appdb
 //
 //  Created by ned on 18/03/2017.
-//  Copyright Â© 2017 ned. All rights reserved.
+//  Copyright Ã‚Â© 2017 ned. All rights reserved.
 //
 
 import UIKit
@@ -92,6 +92,22 @@ extension API {
                                 }
                                 versions.append(version)
                             }
+                        }
+
+                        if versions.isEmpty {
+                            var fallback = Version(number: Global.tilde)
+                            fallback.links.append(Link(
+                                link: "",
+                                cracker: "appdb",
+                                uploader: "appdb",
+                                host: "appdb",
+                                id: trackid,
+                                verified: true,
+                                di_compatible: true,
+                                hidden: false,
+                                is_compatible: true
+                            ))
+                            versions.append(fallback)
                         }
 
                         DispatchQueue.main.async {
