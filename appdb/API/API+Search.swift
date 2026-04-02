@@ -26,7 +26,7 @@ extension API {
     }
 
     private static func filterByType(_ entry: JSON, for requestedType: ItemType) -> Bool {
-        let value = entry["type"].stringValue.lowercased()
+        let value = (entry["type"].stringValue.isEmpty ? entry["content_type"].stringValue : entry["type"].stringValue).lowercased()
         switch requestedType {
         case .ios:
             return value.contains("official") || value.contains("app")
@@ -41,7 +41,7 @@ extension API {
 
     private static func legacyId(from entry: JSON) -> Int {
         if entry["id"].intValue != 0 { return entry["id"].intValue }
-        let uoid = entry["universal_object_identifier"].stringValue
+        let uoid = entry["universal_object_identifier"].stringValue.isEmpty ? entry["uoid"].stringValue : entry["universal_object_identifier"].stringValue
         if uoid.count >= 8 {
             let prefix = String(uoid.prefix(8))
             return Int(prefix, radix: 16) ?? abs(prefix.hashValue)
@@ -51,7 +51,7 @@ extension API {
 
     private static func mapSearchEntryToLegacy(_ entry: JSON, requestedType: ItemType) -> [String: Any] {
         let mappedType: String = {
-            let raw = entry["type"].stringValue
+            let raw = entry["type"].stringValue.isEmpty ? entry["content_type"].stringValue : entry["type"].stringValue
             if raw == "official_app" { return "ios" }
             if raw.contains("book") { return "books" }
             if raw.contains("cydia") || raw.contains("enhancement") { return "cydia" }
@@ -91,7 +91,7 @@ extension API {
             "type": mappedType,
             "updateable": 0,
             "whatsnew_text": "",
-            "universal_object_identifier": entry["universal_object_identifier"].stringValue
+            "universal_object_identifier": entry["universal_object_identifier"].stringValue.isEmpty ? entry["uoid"].stringValue : entry["universal_object_identifier"].stringValue
         ]
     }
 
@@ -141,6 +141,7 @@ extension API {
                         if trackid != "0" {
                             rawItems = rawItems.filter {
                                 $0["universal_object_identifier"].stringValue == trackid ||
+                                $0["uoid"].stringValue == trackid ||
                                 $0["id"].stringValue == trackid ||
                                 $0["trackid"].stringValue == trackid
                             }
@@ -185,7 +186,8 @@ extension API {
     }
 
     static func fastSearch(type: ItemType, query: String, maxResults: Int = 10, success: @escaping (_ results: [String]) -> Void) {
-        AF.request(endpoint + Actions.search.rawValue, parameters: ["order": Order.all.rawValue,
+        AF.request(endpoint + Actions.search.rawValue, parameters: ["content_type": defaultContentType(for: type),
+                                         "order": Order.all.rawValue,
                                          "q": query,
                                          "lang": languageCode,
                                          "length": maxResults,
@@ -224,7 +226,8 @@ extension API {
     }
 
     static func getTrending(type: ItemType, order: Order = .all, maxResults: Int = 8, success: @escaping (_ results: [String]) -> Void) {
-        AF.request(endpoint + Actions.search.rawValue, parameters: ["order": order.rawValue,
+        AF.request(endpoint + Actions.search.rawValue, parameters: ["content_type": defaultContentType(for: type),
+                                         "order": order.rawValue,
                                          "lang": languageCode,
                                          "length": maxResults,
                                          "start": 0], headers: headers)
