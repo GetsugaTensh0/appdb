@@ -275,8 +275,8 @@ extension Library {
                 }
                 let app = self.myAppstoreIpas[sender.tag]
                 let installId: String = {
-                    if !app.apiIdentifier.isEmpty { return app.apiIdentifier }
                     if !app.universalObjectIdentifier.isEmpty { return app.universalObjectIdentifier }
+                    if !app.apiIdentifier.isEmpty { return app.apiIdentifier }
                     if !sender.linkId.isEmpty { return sender.linkId }
                     return String(app.id)
                 }()
