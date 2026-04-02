@@ -3,7 +3,7 @@
 //  appdb
 //
 //  Created by ned on 26/04/2019.
-//  Copyright © 2019 ned. All rights reserved.
+//  Copyright Â© 2019 ned. All rights reserved.
 //
 
 import UIKit
@@ -25,7 +25,7 @@ extension API {
     }
 
     static func deleteIpa(id: String, completion: @escaping (_ error: String?) -> Void) {
-        AF.request(endpoint + Actions.deleteIpa.rawValue, parameters: ["id": id, "lang": languageCode], headers: headersWithCookie)
+        AF.request(endpoint + Actions.deleteIpa.rawValue, parameters: ["id": id, "uoid": id, "lang": languageCode], headers: headersWithCookie)
             .responseJSON { response in
                 switch response.result {
                 case .success(let value):
