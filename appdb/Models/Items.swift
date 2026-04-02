@@ -3,7 +3,7 @@
 //  appdb
 //
 //  Created by ned on 12/10/2016.
-//  Copyright © 2016 ned. All rights reserved.
+//  Copyright Â© 2016 ned. All rights reserved.
 //
 
 import Foundation
@@ -15,6 +15,7 @@ class Item: Hashable, Mappable {
     func mapping(map: Map) { }
 
     var id: Int = 0
+    var universalObjectIdentifier: String = ""
 
     class func type() -> ItemType {
         .ios // Default implementation
