@@ -3,7 +3,7 @@
 //  appdb
 //
 //  Created by ned on 02/05/2019.
-//  Copyright Â© 2019 ned. All rights reserved.
+//  Copyright Ã‚Â© 2019 ned. All rights reserved.
 //
 
 import Foundation
@@ -269,8 +269,17 @@ extension Library {
             setButtonTitle("Requesting...")
 
             func install(_ additionalOptions: [AdditionalInstallationParameters: Any] = [:]) {
+                guard self.myAppstoreIpas.indices.contains(sender.tag) else {
+                    setButtonTitle("Install")
+                    return
+                }
                 let app = self.myAppstoreIpas[sender.tag]
-                let installId = app.universalObjectIdentifier.isEmpty ? sender.linkId : app.universalObjectIdentifier
+                let installId: String = {
+                    if !app.apiIdentifier.isEmpty { return app.apiIdentifier }
+                    if !app.universalObjectIdentifier.isEmpty { return app.universalObjectIdentifier }
+                    if !sender.linkId.isEmpty { return sender.linkId }
+                    return String(app.id)
+                }()
                 API.install(id: installId, type: .myAppstore, additionalOptions: additionalOptions) { [weak self] error in
                     guard let self = self else { return }
 
@@ -523,7 +532,7 @@ extension Library: UICollectionViewDelegateFlowLayout {
     }
 
     @objc private func showHelpMyAppStore() {
-        let message = "appdb presents MyAppStore - your own AppStore. A brand new custom app installer transformed into your personal IPA library!\n\nâ€¢ Save your personal apps to appdb\nâ€¢ Shared across all your devices under the same email\nâ€¢ Store apps up to 4GB\nâ€¢ Upload multiple apps at once\n\nTo get started, click on a local IPA and select 'Upload to MyAppStore'".localized()
+        let message = "appdb presents MyAppStore - your own AppStore. A brand new custom app installer transformed into your personal IPA library!\n\nÃ¢â‚¬Â¢ Save your personal apps to appdb\nÃ¢â‚¬Â¢ Shared across all your devices under the same email\nÃ¢â‚¬Â¢ Store apps up to 4GB\nÃ¢â‚¬Â¢ Upload multiple apps at once\n\nTo get started, click on a local IPA and select 'Upload to MyAppStore'".localized()
         let alertController = UIAlertController(title: "MyAppStore", message: message, preferredStyle: .alert, adaptive: true)
         let okAction = UIAlertAction(title: "OK".localized(), style: .cancel)
         alertController.addAction(okAction)
