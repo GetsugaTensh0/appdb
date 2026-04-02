@@ -3,7 +3,7 @@
 //  appdb
 //
 //  Created by ned on 13/03/2018.
-//  Copyright Â© 2018 ned. All rights reserved.
+//  Copyright Ã‚Â© 2018 ned. All rights reserved.
 //
 
 import UIKit
@@ -166,7 +166,7 @@ class Updates: LoadingTableView {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let apps = indexPath.section == 0 ? updateableApps : nonUpdateableApps
         let item = apps[indexPath.row]
-        let vc = Details(type: item.itemType, trackid: item.trackid.description)
+        let vc = Details(type: item.itemType, trackid: item.trackid)
         if Global.isIpad {
             let nav = DismissableModalNavController(rootViewController: vc)
             nav.modalPresentationStyle = .formSheet
@@ -213,7 +213,7 @@ class Updates: LoadingTableView {
     override func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath) -> [UITableViewRowAction]? {
         let ignore = UITableViewRowAction(style: .normal, title: "Ignore".localized()) { _, _ in
             let app = (indexPath.section == 0 ? self.updateableApps : self.nonUpdateableApps)[indexPath.row]
-            let ignoredApp = IgnoredApp(trackid: app.trackid.description, name: app.name, iconUrl: app.image, type: app.type)
+            let ignoredApp = IgnoredApp(trackid: app.trackid, name: app.name, iconUrl: app.image, type: app.type)
             Preferences.append(.ignoredUpdateableApps, element: ignoredApp)
 
             if indexPath.section == 0 {
