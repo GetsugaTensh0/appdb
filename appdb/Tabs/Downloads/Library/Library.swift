@@ -3,7 +3,7 @@
 //  appdb
 //
 //  Created by ned on 22/04/2019.
-//  Copyright © 2019 ned. All rights reserved.
+//  Copyright Â© 2019 ned. All rights reserved.
 //
 
 import UIKit
@@ -165,7 +165,8 @@ class Library: LoadingCollectionView {
             }
         })
         alertController.addAction(UIAlertAction(title: "Delete".localized(), style: .destructive) { _ in
-            self.deleteMyAppStoreApp(id: app.id.description, indexPath: indexPath)
+            let deleteId = !app.apiIdentifier.isEmpty ? app.apiIdentifier : (!app.universalObjectIdentifier.isEmpty ? app.universalObjectIdentifier : String(app.id))
+            self.deleteMyAppStoreApp(id: deleteId, indexPath: indexPath)
         })
 
         alertController.addAction(UIAlertAction(title: "Cancel".localized(), style: .cancel))
@@ -316,7 +317,8 @@ extension Library {
 
                 let deleteCancel = UIAction(title: "Cancel".localized(), image: UIImage(systemName: "xmark")) { _ in }
                 let deleteConfirmation = UIAction(title: "Delete".localized(), image: UIImage(systemName: "checkmark"), attributes: .destructive) { _ in
-                    self.deleteMyAppStoreApp(id: app.id.description, indexPath: indexPath)
+                    let deleteId = !app.apiIdentifier.isEmpty ? app.apiIdentifier : (!app.universalObjectIdentifier.isEmpty ? app.universalObjectIdentifier : String(app.id))
+                    self.deleteMyAppStoreApp(id: deleteId, indexPath: indexPath)
                 }
 
                 let delete = UIMenu(title: "Delete".localized(), image: UIImage(systemName: "trash"), options: .destructive, children: [deleteCancel, deleteConfirmation])
