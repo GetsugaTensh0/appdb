@@ -3,7 +3,7 @@
 //  appdb
 //
 //  Created by ned on 19/02/2017.
-//  Copyright © 2017 ned. All rights reserved.
+//  Copyright Â© 2017 ned. All rights reserved.
 //
 
 import UIKit
@@ -131,11 +131,11 @@ extension Details {
             if !app.publisher.isEmpty { details.append(DetailsPublisher(app.publisher)) }
             }
         case .cydia: if let app = content as? CydiaApp {
-            details.append(DetailsPublisher("© " + app.developer))
+            details.append(DetailsPublisher("Â© " + app.developer))
             }
         case .books: if let book = content as? Book {
             details.append(DetailsExternalLink(text: "More by this author".localized(), devId: book.artistId.description, devName: book.author))
-            if !book.publisher.isEmpty { details.append(DetailsPublisher(book.publisher)) } else if !book.author.isEmpty { details.append(DetailsPublisher("© " + book.author)) }
+            if !book.publisher.isEmpty { details.append(DetailsPublisher(book.publisher)) } else if !book.author.isEmpty { details.append(DetailsPublisher("Â© " + book.author)) }
             }
         default:
             break
@@ -145,7 +145,8 @@ extension Details {
 
     // Get links
     func getLinks() {
-        API.getLinks(type: contentType, trackid: content.itemId, success: { [weak self] items in
+        let identifier = content.itemUoid.isEmpty ? content.itemId : content.itemUoid
+        API.getLinks(type: contentType, trackid: identifier, success: { [weak self] items in
             guard let self = self else { return }
 
             self.versions = items
