@@ -110,6 +110,11 @@ class QueuedApps: LoadingCollectionView {
         cell.configure(with: requestedApps[indexPath.row])
         return cell
     }
+
+    override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        guard requestedApps.indices.contains(indexPath.row) else { return }
+        ObserveQueuedApps.shared.openInstallPrompt(for: requestedApps[indexPath.row])
+    }
 }
 
 // MARK: - ETCollectionViewDelegateWaterfallLayout

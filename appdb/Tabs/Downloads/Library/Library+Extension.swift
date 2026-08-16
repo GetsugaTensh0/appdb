@@ -274,13 +274,15 @@ extension Library {
                     return
                 }
                 let app = self.myAppstoreIpas[sender.tag]
+                let ticket = app.installationTicket.trimmingCharacters(in: .whitespacesAndNewlines)
                 let installId: String = {
+                    if !ticket.isEmpty, ticket != "0", ticket != "1" { return ticket }
                     if !app.universalObjectIdentifier.isEmpty { return app.universalObjectIdentifier }
                     if !app.apiIdentifier.isEmpty { return app.apiIdentifier }
                     if !sender.linkId.isEmpty { return sender.linkId }
                     return String(app.id)
                 }()
-                API.install(id: installId, type: .myAppstore, additionalOptions: additionalOptions) { [weak self] error, result in
+                API.install(id: installId, type: .ios, additionalOptions: additionalOptions) { [weak self] error, result in
                     guard let self = self else { return }
 
                     if let error = error {

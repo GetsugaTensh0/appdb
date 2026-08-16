@@ -16,8 +16,9 @@ struct RequestedApp: Matchable, Codable, Equatable {
     var bundleId: String = ""
     var commandUuid: String = ""
     var installationType: String = ""
+    var manifestUri: String = ""
 
-    init(type: ItemType, linkId: String, name: String, image: String, bundleId: String, status: String = "", commandUuid: String = "", installationType: String = "") {
+    init(type: ItemType, linkId: String, name: String, image: String, bundleId: String, status: String = "", commandUuid: String = "", installationType: String = "", manifestUri: String = "") {
         self.linkId = linkId
         self.type = type
         self.name = name
@@ -26,6 +27,7 @@ struct RequestedApp: Matchable, Codable, Equatable {
         self.status = status
         self.commandUuid = commandUuid
         self.installationType = installationType
+        self.manifestUri = manifestUri
     }
 
     func match(with object: Any) -> Match {

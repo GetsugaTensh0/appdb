@@ -13,7 +13,7 @@ import SwiftyJSON
 extension API {
 
     static func getIpas(success: @escaping (_ items: [MyAppStoreApp]) -> Void, fail: @escaping (_ error: NSError) -> Void) {
-        AF.request(endpoint + Actions.getIpas.rawValue, parameters: ["lang": languageCode], headers: headersWithCookie)
+        post(.getIpas)
             .responseArray(keyPath: "data") { (response: AFDataResponse<[MyAppStoreApp]>) in
                 switch response.result {
                 case .success(let ipas):

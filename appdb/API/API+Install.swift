@@ -58,16 +58,11 @@ extension API {
 
     static func install(id: String, type: ItemType, additionalOptions: [AdditionalInstallationParameters: Any] = [:], asIpaFile: Bool = false, completion: @escaping (_ error: String?, _ result: InstallResult?) -> Void) {
         var parameters: [String: Any] = [
-            "type": type == .myAppstore ? "libraries" : "universal"
+            "type": "universal"
         ]
         for (key, value) in additionalOptions { parameters[key.rawValue] = value }
         if asIpaFile { parameters["as_ipa_file"] = 1 }
-
-        if type == .myAppstore {
-            parameters["id"] = id
-            performInstall(parameters: parameters, completion: completion)
-            return
-        }
+        _ = type
 
         func installWithTicket(_ ticket: String) {
             guard !ticket.isEmpty else {
