@@ -17,6 +17,12 @@ extension API {
         return trimmed.count == 40 && trimmed.allSatisfy { $0.isHexDigit }
     }
 
+    static func isRealInstallationTicket(_ value: String) -> Bool {
+        let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+        if trimmed.isEmpty || trimmed == "0" || trimmed == "1" { return false }
+        return trimmed.count >= 16
+    }
+
     static func strippedAPIMessage(_ raw: String) -> String {
         let text = raw.decoded.trimmingCharacters(in: .whitespacesAndNewlines)
         return text.isEmpty ? raw : text
@@ -193,16 +199,23 @@ extension API {
         return params
     }
 
-    static func fetchGatewayObject(identifier: String, success: @escaping (_ json: JSON) -> Void, fail: @escaping (_ error: String) -> Void) {
+    static func fetchGatewayObject(identifier: String, internalId: String = "", success: @escaping (_ json: JSON) -> Void, fail: @escaping (_ error: String) -> Void) {
         let value = identifier.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !value.isEmpty else {
+        let privateId = internalId.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !value.isEmpty || !privateId.isEmpty else {
             fail("Couldn't find content with id %@ in our database".localizedFormat(identifier))
             return
         }
-        // 1.7 resolves objects only by universal_object_identifier. `id` / `identifier` fail.
-        let request = post(.getLinks, parameters: [
-            "universal_object_identifier": value
-        ])
+        var parameters: [String: Any] = [:]
+        if !value.isEmpty {
+            parameters["universal_object_identifier"] = value
+        } else {
+            parameters["universal_object_identifier"] = privateId
+        }
+        if !privateId.isEmpty {
+            parameters["id"] = Int(privateId) ?? (privateId as Any)
+        }
+        let request = post(.getLinks, parameters: parameters)
         quickCheckForErrors(request, completion: { ok, hasError, _ in
             if ok {
                 request.responseJSON { response in

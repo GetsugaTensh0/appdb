@@ -274,15 +274,8 @@ extension Library {
                     return
                 }
                 let app = self.myAppstoreIpas[sender.tag]
-                let ticket = app.installationTicket.trimmingCharacters(in: .whitespacesAndNewlines)
-                let installId: String = {
-                    if !ticket.isEmpty, ticket != "0", ticket != "1" { return ticket }
-                    if !app.universalObjectIdentifier.isEmpty { return app.universalObjectIdentifier }
-                    if !app.apiIdentifier.isEmpty { return app.apiIdentifier }
-                    if !sender.linkId.isEmpty { return sender.linkId }
-                    return String(app.id)
-                }()
-                API.install(id: installId, type: .ios, additionalOptions: additionalOptions) { [weak self] error, result in
+                let ipaId = app.id > 0 ? String(app.id) : (app.apiIdentifier.isEmpty ? sender.linkId : app.apiIdentifier)
+                API.installLibraryIpa(id: ipaId, ticket: app.installationTicket, uoid: app.universalObjectIdentifier, additionalOptions: additionalOptions) { [weak self] error, result in
                     guard let self = self else { return }
 
                     if let error = error {
@@ -294,7 +287,7 @@ extension Library {
                                 } else {
                                     setButtonTitle("Requested")
                                     Messages.shared.showSuccess(message: "Signing started. Watch Downloads for progress.".localized())
-                                    ObserveQueuedApps.shared.addApp(type: .myAppstore, linkId: installId, name: app.name, image: "", bundleId: app.bundleId)
+                                    ObserveQueuedApps.shared.addApp(type: .myAppstore, linkId: ipaId, name: app.name, image: "", bundleId: app.bundleId)
                                     delay(5) { setButtonTitle("Install") }
                                 }
                             }
@@ -309,7 +302,7 @@ extension Library {
 
                         Messages.shared.showSuccess(message: "Signing started. Watch Downloads for progress.".localized())
 
-                        ObserveQueuedApps.shared.addApp(type: .myAppstore, linkId: installId, name: app.name, image: "", bundleId: app.bundleId, commandUuid: result?.commandUuid ?? "", installationType: result?.installationType ?? "")
+                        ObserveQueuedApps.shared.addApp(type: .myAppstore, linkId: ipaId, name: app.name, image: "", bundleId: app.bundleId, commandUuid: result?.commandUuid ?? "", installationType: result?.installationType ?? "")
 
                         delay(5) { setButtonTitle("Install") }
                     }

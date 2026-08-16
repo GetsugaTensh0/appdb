@@ -13,13 +13,33 @@ import SwiftyJSON
 extension API {
 
     static func getIpas(success: @escaping (_ items: [MyAppStoreApp]) -> Void, fail: @escaping (_ error: NSError) -> Void) {
-        post(.getIpas)
-            .responseArray(keyPath: "data") { (response: AFDataResponse<[MyAppStoreApp]>) in
+        post(.getIpas, parameters: ["start": 0, "length": 200])
+            .responseJSON { response in
                 switch response.result {
-                case .success(let ipas):
+                case .success(let value):
+                    let rows = JSON(value)["data"].arrayValue
+                    let ipas: [MyAppStoreApp] = rows.compactMap { row in
+                        guard let app = Mapper<MyAppStoreApp>().map(JSON: row.dictionaryObject ?? [:]) else { return nil }
+                        if app.universalObjectIdentifier.isEmpty {
+                            app.universalObjectIdentifier = row["universal_object_identifier"].stringValue
+                            if app.universalObjectIdentifier.isEmpty {
+                                app.universalObjectIdentifier = row["uoid"].stringValue
+                            }
+                        }
+                        if !isRealInstallationTicket(app.installationTicket) {
+                            let ticket = row["installation_ticket"].stringValue
+                            if isRealInstallationTicket(ticket) {
+                                app.installationTicket = ticket
+                            }
+                        }
+                        if app.link.isEmpty {
+                            app.link = row["link"].stringValue.isEmpty ? row["download_link"].stringValue : row["link"].stringValue
+                        }
+                        return app
+                    }
                     success(ipas)
-                case .failure(let error as NSError):
-                    fail(error)
+                case .failure(let error):
+                    fail(error as NSError)
                 }
             }
     }

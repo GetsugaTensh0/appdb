@@ -75,20 +75,57 @@ extension API {
         }
 
         // Spec: /install/ takes installation_ticket from /universal_gateway/, not a UOID.
-        if !isUniversalObjectIdentifier(id), !id.isEmpty {
+        if isRealInstallationTicket(id), !isUniversalObjectIdentifier(id) {
             installWithTicket(id)
             return
         }
 
         fetchGatewayObject(identifier: id, success: { json in
             let ticket = json["data"]["installation_ticket"].stringValue
-            if ticket.isEmpty {
+            if isRealInstallationTicket(ticket) {
+                installWithTicket(ticket)
+            } else {
                 let reason = strippedAPIMessage(json["data"]["no_installation_ticket_failure_reason"]["translated"].stringValue)
                 completion(reason.isEmpty ? "Please authorize app from Settings first".localized() : reason, nil)
-            } else {
-                installWithTicket(ticket)
             }
         }, fail: { completion($0, nil) })
+    }
+
+    // MyAppStore / personal library. 1.7 deleted type=MyAppStore; type=libraries is rejected
+    // on profile-linked devices. Use a real gateway ticket, or type=universal + the IPA id.
+    static func installLibraryIpa(id: String, ticket: String = "", uoid: String = "", additionalOptions: [AdditionalInstallationParameters: Any] = [:], completion: @escaping (_ error: String?, _ result: InstallResult?) -> Void) {
+        var parameters: [String: Any] = [
+            "type": "universal"
+        ]
+        for (key, value) in additionalOptions { parameters[key.rawValue] = value }
+        if let intId = Int(id) {
+            parameters["id"] = intId
+        } else if !id.isEmpty {
+            parameters["id"] = id
+        }
+
+        func installWith(_ extra: [String: Any]) {
+            var merged = parameters
+            for (key, value) in extra { merged[key] = value }
+            performInstall(parameters: merged, completion: completion)
+        }
+
+        if isRealInstallationTicket(ticket) {
+            installWith(["installation_ticket": ticket])
+            return
+        }
+
+        let gatewayId = isUniversalObjectIdentifier(uoid) ? uoid : (uoid.isEmpty ? "" : uoid)
+        fetchGatewayObject(identifier: gatewayId, internalId: id, success: { json in
+            let realTicket = json["data"]["installation_ticket"].stringValue
+            if isRealInstallationTicket(realTicket) {
+                installWith(["installation_ticket": realTicket])
+            } else {
+                installWith([:])
+            }
+        }, fail: { _ in
+            installWith([:])
+        })
     }
 
     static func customInstall(ipaUrl: String, type: ItemType, iconUrl: String, bundleId: String, name: String, additionalOptions: [AdditionalInstallationParameters: Any] = [:], completion: @escaping (_ error: String?) -> Void) {

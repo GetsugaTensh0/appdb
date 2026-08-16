@@ -19,7 +19,7 @@ class DeviceStatusCell: UITableViewCell {
 
     func updateContent(with item: DeviceStatusItem) {
         timestamp.text = prettify(item.timestamp)
-        status.text = prettify(item.status)
+        status.text = item.manifestUri.isEmpty ? prettify(item.status) : (prettify(item.status) + " — " + "Tap to install".localized())
         type.text = prettify(item.type)
         title.text = prettify(item.title)
         bundle.text = prettify(item.bundleId)
@@ -51,7 +51,7 @@ class DeviceStatusCell: UITableViewCell {
             line.top ~== line.superview!.bottom ~- (1 / UIScreen.main.scale)
         }
 
-        selectionStyle = .none
+        selectionStyle = .default
 
         status = generateLabel(); statusLeft = generateLabel(text: "Status")
         type = generateLabel(); typeLeft = generateLabel(text: "Type")

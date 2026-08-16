@@ -83,51 +83,83 @@ class ObserveQueuedApps {
     }
 
     @objc func updateAppsStatus() {
-        if !requestedApps.isEmpty {
-            API.getDeviceStatus(success: { [weak self] items in
-                guard let self = self else { return }
-                for app in self.requestedApps {
-                    let matches = self.matchingItems(for: app, in: items)
-                    if matches.isEmpty, self.requestedApps.count == 1,
-                       let orphan = items.first(where: { !$0.manifestUri.isEmpty || !$0.statusText.isEmpty || $0.type.contains("install") || $0.type.contains("sign") }) {
-                        self.apply(item: orphan, to: app)
-                    } else {
-                        for item in matches { self.apply(item: item, to: app) }
-                    }
-                }
-                self.onUpdate?(self.requestedApps)
+        guard !requestedApps.isEmpty else { return }
+
+        let commandUuids = requestedApps.map { $0.commandUuid }.filter { !$0.isEmpty }
+        API.getDeviceStatus(success: { [weak self] items in
+            self?.ingest(items)
+        }, fail: { _ in })
+
+        if !commandUuids.isEmpty {
+            API.getDeviceStatus(uuids: commandUuids, success: { [weak self] items in
+                self?.ingest(items)
             }, fail: { _ in })
+            if let first = commandUuids.first {
+                API.getDeviceStatus(sinceUuid: first, success: { [weak self] items in
+                    self?.ingest(items)
+                }, fail: { _ in })
+            }
         }
     }
 
     func openInstallPrompt(for app: RequestedApp) {
-        let manifest = app.manifestUri
+        openInstallPrompt(manifest: app.manifestUri, linkId: app.commandUuid.isEmpty ? app.linkId : app.commandUuid)
+    }
+
+    func openInstallPrompt(manifest: String, linkId: String = "") {
         guard !manifest.isEmpty, let url = itmsURL(from: manifest) else {
             Messages.shared.showError(message: "Install file is not ready yet".localized())
             return
         }
         UIApplication.shared.open(url, options: [:], completionHandler: { [weak self] success in
             if success {
-                self?.updateStatus(linkId: app.commandUuid.isEmpty ? app.linkId : app.commandUuid, status: "Install prompt sent".localized())
+                if !linkId.isEmpty {
+                    self?.updateStatus(linkId: linkId, status: "Install prompt sent".localized())
+                }
+            } else if let https = URL(string: manifest), https.scheme == "https" {
+                UIApplication.shared.open(https)
             } else {
                 Messages.shared.showError(message: "Unable to open the iOS install prompt".localized())
             }
         })
     }
 
-    private func matchingItems(for app: RequestedApp, in items: [DeviceStatusItem]) -> [DeviceStatusItem] {
-        items.filter { item in
-            if !app.commandUuid.isEmpty, item.uuid == app.commandUuid { return true }
-            if !app.bundleId.isEmpty, !item.bundleId.isEmpty, item.bundleId == app.bundleId { return true }
-            if !app.linkId.isEmpty, item.linkId == app.linkId || item.uoid == app.linkId { return true }
-            if !app.name.isEmpty, !item.title.isEmpty, item.title.compare(app.name, options: [.caseInsensitive, .diacriticInsensitive]) == .orderedSame { return true }
-            return false
+    private func ingest(_ items: [DeviceStatusItem]) {
+        guard !items.isEmpty else { return }
+        for app in requestedApps {
+            let matches = matchingItems(for: app, in: items)
+            if matches.isEmpty {
+                if let ready = items.first(where: { !$0.manifestUri.isEmpty && self.looksRelated($0, to: app) }) {
+                    apply(item: ready, to: app)
+                } else if requestedApps.count == 1, let orphan = items.first(where: { !$0.manifestUri.isEmpty || $0.isReadyToInstall || !$0.statusText.isEmpty || $0.type.contains("install") || $0.type.contains("sign") }) {
+                    apply(item: orphan, to: app)
+                }
+            } else {
+                for item in matches { apply(item: item, to: app) }
+                let stored = self.requestedApps.first(where: { $0.linkId == app.linkId || $0.commandUuid == app.commandUuid })
+                if stored?.manifestUri.isEmpty != false, let ready = items.first(where: { !$0.manifestUri.isEmpty && (self.looksRelated($0, to: app) || $0.isReadyToInstall) }) {
+                    apply(item: ready, to: app)
+                }
+            }
         }
+        onUpdate?(requestedApps)
+    }
+
+    private func looksRelated(_ item: DeviceStatusItem, to app: RequestedApp) -> Bool {
+        if !app.commandUuid.isEmpty, item.uuid == app.commandUuid { return true }
+        if !app.bundleId.isEmpty, !item.bundleId.isEmpty, item.bundleId == app.bundleId { return true }
+        if !app.linkId.isEmpty, item.linkId == app.linkId || item.uoid == app.linkId { return true }
+        if !app.name.isEmpty, !item.title.isEmpty, item.title.compare(app.name, options: [.caseInsensitive, .diacriticInsensitive]) == .orderedSame { return true }
+        return false
+    }
+
+    private func matchingItems(for app: RequestedApp, in items: [DeviceStatusItem]) -> [DeviceStatusItem] {
+        items.filter { looksRelated($0, to: app) }
     }
 
     private func apply(item: DeviceStatusItem, to app: RequestedApp) {
         let usesItms = app.installationType != "push"
-        let failed = item.status.lowercased().contains("fail") || item.statusShort == "failed"
+        let failed = item.isFailed
 
         if !item.manifestUri.isEmpty, let index = requestedApps.firstIndex(where: { $0.linkId == app.linkId || $0.commandUuid == app.commandUuid }) {
             requestedApps[index].manifestUri = item.manifestUri
@@ -156,6 +188,10 @@ class ObserveQueuedApps {
             newStatus = friendlyStatus(item.status)
         }
         updateStatus(linkId: app.commandUuid.isEmpty ? app.linkId : app.commandUuid, status: newStatus)
+
+        if usesItms, item.isReadyToInstall {
+            updateStatus(linkId: app.commandUuid.isEmpty ? app.linkId : app.commandUuid, status: "Signed. Waiting for install file...".localized())
+        }
 
         if usesItms, !item.downloadUri.isEmpty {
             promptDownload(from: item, app: app)
@@ -187,7 +223,6 @@ class ObserveQueuedApps {
         ready.manifestUri = item.manifestUri
         DispatchQueue.main.async {
             guard let host = UIApplication.topViewController() else {
-                self.openInstallPrompt(for: ready)
                 return
             }
             let alert = UIAlertController(
@@ -215,10 +250,13 @@ class ObserveQueuedApps {
     }
 
     private func itmsURL(from manifest: String) -> URL? {
-        if manifest.hasPrefix("itms-services://") {
-            return URL(string: manifest)
+        let trimmed = manifest.trimmingCharacters(in: .whitespacesAndNewlines)
+        if trimmed.hasPrefix("itms-services://") {
+            return URL(string: trimmed)
         }
-        let encoded = manifest.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? manifest
+        var allowed = CharacterSet.alphanumerics
+        allowed.insert(charactersIn: "-._~")
+        let encoded = trimmed.addingPercentEncoding(withAllowedCharacters: allowed) ?? trimmed
         return URL(string: "itms-services://?action=download-manifest&url=\(encoded)")
     }
 

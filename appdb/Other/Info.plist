@@ -229,6 +229,8 @@
 	<string>1</string>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
+		<string>itms-services</string>
+		<string>itms</string>
 		<string>ms-outlook</string>
 		<string>tg</string>
 		<string>twitter</string>

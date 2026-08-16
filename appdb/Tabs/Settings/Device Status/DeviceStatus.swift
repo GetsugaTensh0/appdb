@@ -172,10 +172,13 @@ class DeviceStatus: LoadingTableView {
         return UITableViewCell()
     }
 
-    // Option to Fix or Retry command with given UUID
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         let item = statuses[indexPath.row]
+        if !item.manifestUri.isEmpty {
+            ObserveQueuedApps.shared.openInstallPrompt(manifest: item.manifestUri, linkId: item.uuid)
+            return
+        }
         API.retryCommand(uuid: item.uuid)
         Messages.shared.showSuccess(message: "Retry requested".localized(), context: .viewController(self))
     }

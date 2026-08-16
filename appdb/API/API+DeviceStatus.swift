@@ -17,10 +17,11 @@ extension API {
         if !uuids.isEmpty { parameters["uuids"] = uuids }
         if !sinceUuid.isEmpty { parameters["since_uuid"] = sinceUuid }
         post(.getStatus, parameters: parameters)
-            .responseArray(keyPath: "data") { (response: AFDataResponse<[DeviceStatusItem]>) in
+            .responseJSON { response in
                 switch response.result {
-                case .success(let results):
-                    success(results)
+                case .success(let value):
+                    let json = JSON(value)
+                    success(json["data"].arrayValue.map { DeviceStatusItem.parse($0) })
                 case .failure(let error):
                     fail(error as NSError)
                 }

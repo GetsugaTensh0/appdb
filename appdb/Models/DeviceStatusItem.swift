@@ -14,6 +14,8 @@ struct DeviceStatusItem: Mappable, Matchable {
 
     init?(map: Map) { }
 
+    init() { }
+
     var uuid: String = ""
     var added: String = ""
     var params: String = ""
@@ -53,14 +55,36 @@ struct DeviceStatusItem: Mappable, Matchable {
             acknowledged <- map["acknowledged"]
         }
 
+        applyTimestamps()
+        applyParams(JSON(map.JSON))
+    }
+
+    static func parse(_ json: JSON) -> DeviceStatusItem {
+        var item = DeviceStatusItem()
+        item.uuid = json["uuid"].stringValue
+        item.status = json["status"].stringValue
+        item.type = json["type"].stringValue
+        item.added = stringValue(json["added"])
+        item.acknowledged = stringValue(json["acknowledged"])
+        if json["params"].type == .string {
+            item.params = json["params"].stringValue
+        } else if json["params"].type == .dictionary || json["params"].type == .array {
+            item.params = json["params"].rawString() ?? ""
+        }
+        item.applyTimestamps()
+        item.applyParams(json)
+        return item
+    }
+
+    private mutating func applyTimestamps() {
         acknowledged = acknowledged.unixToDetailedString
         timestamp = Global.formattedTimeFromNow(from: added.unixToDate)
+    }
 
-        var parsed = JSON()
-        if let dict = map.JSON["params"] as? [String: Any] {
-            parsed = JSON(dict)
-        } else if let data = params.data(using: .utf8) {
-            parsed = JSON(data)
+    private mutating func applyParams(_ root: JSON) {
+        var parsed = decodeParams(root["params"])
+        if parsed.type == .null || (parsed.type == .dictionary && parsed.dictionaryValue.isEmpty) {
+            parsed = decodeParams(JSON(params))
         }
 
         title = firstString(in: parsed, keys: ["link_data.title", "title", "name", "app_name"])
@@ -70,12 +94,64 @@ struct DeviceStatusItem: Mappable, Matchable {
         purpose = firstString(in: parsed, keys: ["purpose"])
         statusShort = firstString(in: parsed, keys: ["sign.status", "status_short", "short_status"])
         statusText = firstString(in: parsed, keys: ["sign.status_text", "status_text", "message", "progress"])
-        manifestUri = deepString(in: parsed, keys: ["manifest_uri", "manifest_url", "itms", "install_uri", "plist_uri", "plist_url"])
-        downloadUri = deepString(in: parsed, keys: ["download_uri", "download_url", "ipa_uri", "ipa_url"])
+        manifestUri = firstNonEmpty([
+            deepString(in: parsed, keys: ["manifest_uri", "manifest_url", "manifestUri", "itms", "itms_services", "itms-services", "install_uri", "plist_uri", "plist_url", "manifest"]),
+            deepString(in: root, keys: ["manifest_uri", "manifest_url", "itms", "install_uri", "plist_uri"])
+        ])
+        downloadUri = firstNonEmpty([
+            deepString(in: parsed, keys: ["download_uri", "download_url", "ipa_uri", "ipa_url"]),
+            deepString(in: root, keys: ["download_uri", "download_url"])
+        ])
         if manifestUri.isEmpty {
-            manifestUri = firstURL(in: params, matching: "manifest") ?? firstURL(in: params, matching: ".plist") ?? ""
+            manifestUri = firstURL(in: params, matching: "manifest")
+                ?? firstURL(in: params, matching: ".plist")
+                ?? firstURL(in: params, matching: "itms")
+                ?? firstURL(in: statusText, matching: "manifest")
+                ?? firstURL(in: statusText, matching: ".plist")
+                ?? ""
         }
         if statusText.hasSuffix("\n") { statusText = statusText.trimTrailingWhitespace() }
+    }
+
+    var isFailed: Bool {
+        let value = status.lowercased()
+        return value.contains("fail") || statusShort.lowercased().contains("fail")
+    }
+
+    var isReadyToInstall: Bool {
+        !manifestUri.isEmpty || ["ok", "done", "success"].contains(status.lowercased())
+    }
+
+    private func decodeParams(_ json: JSON) -> JSON {
+        if json.type == .dictionary { return unwrapJSON(json) }
+        if json.type == .array { return json }
+        let text = json.stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !text.isEmpty, let data = text.data(using: .utf8) else { return json }
+        let decoded = JSON(data)
+        if decoded.type == .string {
+            return decodeParams(decoded)
+        }
+        return unwrapJSON(decoded)
+    }
+
+    private func unwrapJSON(_ json: JSON) -> JSON {
+        if json.type == .dictionary, json["params"].exists() {
+            let nested = json["params"]
+            if nested.type == .dictionary { return nested }
+            if nested.type == .string { return decodeParams(nested) }
+        }
+        return json
+    }
+
+    private func firstNonEmpty(_ values: [String]) -> String {
+        values.first { !$0.isEmpty } ?? ""
+    }
+
+    private static func stringValue(_ json: JSON) -> String {
+        if !json.stringValue.isEmpty { return json.stringValue }
+        if json.int != nil { return String(json.intValue) }
+        if json.double != nil { return String(Int(json.doubleValue)) }
+        return ""
     }
 
     private func firstString(in json: JSON, keys: [String]) -> String {
@@ -111,11 +187,11 @@ struct DeviceStatusItem: Mappable, Matchable {
     }
 
     private func firstURL(in text: String, matching token: String) -> String? {
-        guard let regex = try? NSRegularExpression(pattern: #"https?://[^\s\"'\\]+"#) else { return nil }
+        guard let regex = try? NSRegularExpression(pattern: #"https?://[^\s\"'\\<>]+"#) else { return nil }
         let range = NSRange(text.startIndex..<text.endIndex, in: text)
         for match in regex.matches(in: text, range: range) {
             guard let swiftRange = Range(match.range, in: text) else { continue }
-            let url = String(text[swiftRange])
+            let url = String(text[swiftRange]).trimmingCharacters(in: CharacterSet(charactersIn: ".,);"))
             if url.lowercased().contains(token.lowercased()) { return url }
         }
         return nil
@@ -128,7 +204,7 @@ struct DeviceStatusItem: Mappable, Matchable {
             if statusText == status.statusText && timestamp == status.timestamp {
                 return .equal
             } else {
-                return .change // Same uuid, but not statusText or timestamp
+                return .change
             }
         } else {
             return .none

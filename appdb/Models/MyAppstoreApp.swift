@@ -41,7 +41,11 @@ class MyAppStoreApp: Item {
         size <- map["size"]
         apiIdentifier <- map["id"]
         universalObjectIdentifier <- map["universal_object_identifier"]
-        installationTicket <- map["installation_ticket"]
+        if let ticketInt = map.JSON["installation_ticket"] as? Int {
+            installationTicket = String(ticketInt)
+        } else {
+            installationTicket <- map["installation_ticket"]
+        }
         link <- map["link"]
 
         if universalObjectIdentifier.isEmpty {
