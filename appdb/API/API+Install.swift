@@ -91,40 +91,90 @@ extension API {
         }, fail: { completion($0, nil) })
     }
 
-    // MyAppStore / personal library. 1.7 deleted type=MyAppStore; type=libraries is rejected
-    // on profile-linked devices. Use a real gateway ticket, or type=universal + the IPA id.
+    // Personal library IPAs come from /get_ipas/.
+    // Cached list tickets expire. Never send the IPA id as a ticket.
     static func installLibraryIpa(id: String, ticket: String = "", uoid: String = "", additionalOptions: [AdditionalInstallationParameters: Any] = [:], completion: @escaping (_ error: String?, _ result: InstallResult?) -> Void) {
-        var parameters: [String: Any] = [
-            "type": "universal"
-        ]
-        for (key, value) in additionalOptions { parameters[key.rawValue] = value }
-        if let intId = Int(id) {
-            parameters["id"] = intId
-        } else if !id.isEmpty {
-            parameters["id"] = id
+        _ = ticket
+        var features: [String: Any] = [:]
+        for (key, value) in additionalOptions { features[key.rawValue] = value }
+        let ipaId: Any = Int(id) ?? id
+
+        func attempt(_ extra: [String: Any], then next: ((String) -> Void)? = nil) {
+            var parameters = extra
+            for (key, value) in features { parameters[key] = value }
+            performInstall(parameters: parameters) { error, result in
+                if let error = error {
+                    if let next = next {
+                        next(error)
+                    } else {
+                        completion(error, nil)
+                    }
+                } else {
+                    completion(nil, result)
+                }
+            }
         }
 
-        func installWith(_ extra: [String: Any]) {
-            var merged = parameters
-            for (key, value) in extra { merged[key] = value }
-            performInstall(parameters: merged, completion: completion)
+        func installWithFreshTicket(_ fresh: String, then next: @escaping (String) -> Void) {
+            guard isRealInstallationTicket(fresh) else {
+                next("Installation ticket has expired or is invalid")
+                return
+            }
+            attempt(["type": "universal", "installation_ticket": fresh], then: next)
         }
 
-        if isRealInstallationTicket(ticket) {
-            installWith(["installation_ticket": ticket])
-            return
+        func installFromGateway(_ identifier: String, then next: @escaping (String) -> Void) {
+            guard isUniversalObjectIdentifier(identifier) else {
+                next("Installation ticket has expired or is invalid")
+                return
+            }
+            fetchGatewayObject(identifier: identifier, success: { json in
+                let fresh = json["data"]["installation_ticket"].stringValue
+                if isRealInstallationTicket(fresh) {
+                    installWithFreshTicket(fresh, then: next)
+                } else {
+                    let reason = strippedAPIMessage(json["data"]["no_installation_ticket_failure_reason"]["translated"].stringValue)
+                    next(reason.isEmpty ? "Installation ticket has expired or is invalid" : reason)
+                }
+            }, fail: next)
         }
 
-        let gatewayId = isUniversalObjectIdentifier(uoid) ? uoid : (uoid.isEmpty ? "" : uoid)
-        fetchGatewayObject(identifier: gatewayId, internalId: id, success: { json in
-            let realTicket = json["data"]["installation_ticket"].stringValue
-            if isRealInstallationTicket(realTicket) {
-                installWith(["installation_ticket": realTicket])
+        getIpas(success: { apps in
+            let match = apps.first {
+                String($0.id) == id || $0.apiIdentifier == id || (!uoid.isEmpty && $0.universalObjectIdentifier == uoid)
+            }
+            let freshTicket = match?.installationTicket ?? ""
+            let freshUoid = match?.universalObjectIdentifier ?? uoid
+
+            func tryLibrariesThenGateway(_ previous: String) {
+                attempt(["type": "libraries", "id": ipaId]) { librariesError in
+                    if isUniversalObjectIdentifier(freshUoid) {
+                        installFromGateway(freshUoid) { _ in
+                            completion(librariesError, nil)
+                        }
+                    } else {
+                        completion(previous.isEmpty ? librariesError : previous, nil)
+                    }
+                }
+            }
+
+            if isRealInstallationTicket(freshTicket) {
+                installWithFreshTicket(freshTicket) { ticketError in
+                    tryLibrariesThenGateway(ticketError)
+                }
             } else {
-                installWith([:])
+                tryLibrariesThenGateway("")
             }
         }, fail: { _ in
-            installWith([:])
+            attempt(["type": "libraries", "id": ipaId]) { librariesError in
+                if isUniversalObjectIdentifier(uoid) {
+                    installFromGateway(uoid) { _ in
+                        completion(librariesError, nil)
+                    }
+                } else {
+                    completion(librariesError, nil)
+                }
+            }
         })
     }
 

@@ -201,17 +201,14 @@ extension API {
 
     static func fetchGatewayObject(identifier: String, internalId: String = "", success: @escaping (_ json: JSON) -> Void, fail: @escaping (_ error: String) -> Void) {
         let value = identifier.trimmingCharacters(in: .whitespacesAndNewlines)
-        let privateId = internalId.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !value.isEmpty || !privateId.isEmpty else {
+        guard !value.isEmpty else {
             fail("Couldn't find content with id %@ in our database".localizedFormat(identifier))
             return
         }
-        var parameters: [String: Any] = [:]
-        if !value.isEmpty {
-            parameters["universal_object_identifier"] = value
-        } else {
-            parameters["universal_object_identifier"] = privateId
-        }
+        var parameters: [String: Any] = [
+            "universal_object_identifier": value
+        ]
+        let privateId = internalId.trimmingCharacters(in: .whitespacesAndNewlines)
         if !privateId.isEmpty {
             parameters["id"] = Int(privateId) ?? (privateId as Any)
         }
