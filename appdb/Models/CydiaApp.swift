@@ -68,7 +68,10 @@ class CydiaApp: Item {
         name <- map["name"]
         id <- map["id"]
         image <- map["image"]
+        if image.isEmpty { image <- map["icon_uri"] }
         bundleId <- map["bundle_id"]
+        installationTicket <- map["installation_ticket"]
+        downloadTicket <- map["download_ticket"]
         developer <- map["pname"]
         developerId <- map["artist_id"]
         version <- map["version"]

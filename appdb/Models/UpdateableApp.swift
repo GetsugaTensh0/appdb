@@ -60,7 +60,7 @@ extension UpdateableApp: Mappable {
         let normalizedType = type.lowercased()
         if normalizedType.contains("book") {
             itemType = .books
-        } else if normalizedType.contains("custom") || normalizedType.contains("cydia") || normalizedType.contains("enhancement") {
+        } else if normalizedType.contains("custom") || normalizedType.contains("cydia") || normalizedType.contains("enhancement") || normalizedType.contains("user") || normalizedType.contains("repo") {
             itemType = .cydia
         } else {
             itemType = .ios

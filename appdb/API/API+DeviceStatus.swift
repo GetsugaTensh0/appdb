@@ -36,7 +36,13 @@ extension API {
         }
     }
 
-    static func fixCommand(uuid: String) { _ = uuid }
+    static func fixCommand(uuid: String) {
+        AF.request(endpoint + "cancel_command", parameters: ["uuid": uuid, "lang": languageCode], headers: headersWithCookie)
+            .responseJSON { _ in }
+    }
 
-    static func retryCommand(uuid: String) { _ = uuid }
+    static func retryCommand(uuid: String) {
+        AF.request(endpoint + "retry_command", parameters: ["uuid": uuid, "lang": languageCode], headers: headersWithCookie)
+            .responseJSON { _ in }
+    }
 }

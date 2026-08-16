@@ -99,7 +99,7 @@ enum Price: String, CaseIterable {
 enum Actions: String {
     case search = "search_index"
     case listGenres = "list_genres"
-    case promotions = "promotions"
+    case promotions = "get_promotions"
     case getLinks = "universal_gateway"
     case getPages = "get_pages"
     case newsCategory = "news"
@@ -127,7 +127,7 @@ enum Actions: String {
     case getAppdbAppsBundleIds = "get_appdb_apps_bundle_ids"
     case processRedirect = "process_redirect"
     case getAllDevices = "get_all_devices"
-    case getIpaCacheStatus = "get_install_history"
+    case getIpaCacheStatus = "get_installation_history"
     case getAltStoreRepos = "get_altstore_repos"
     case editAltStoreRepo = "edit_altstore_repo"
     case deleteAltStoreRepo = "delete_altstore_repo"

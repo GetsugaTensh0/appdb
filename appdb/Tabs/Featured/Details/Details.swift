@@ -71,7 +71,29 @@ class Details: LoadingTableView {
 
         if !loadDynamically {
             initializeCells()
-            getLinks()
+            if !content.itemUoid.isEmpty {
+                let apply: (Item) -> Void = { [weak self] item in
+                    guard let self = self else { return }
+                    self.content = item
+                    self.initializeCells()
+                    self.tableView.reloadData()
+                    self.getLinks()
+                }
+                let fallback: (String) -> Void = { [weak self] _ in
+                    self?.getLinks()
+                }
+                if content is App {
+                    API.getItem(type: App.self, identifier: content.itemUoid, success: apply, fail: fallback)
+                } else if content is CydiaApp {
+                    API.getItem(type: CydiaApp.self, identifier: content.itemUoid, success: apply, fail: fallback)
+                } else if content is Book {
+                    API.getItem(type: Book.self, identifier: content.itemUoid, success: apply, fail: fallback)
+                } else {
+                    getLinks()
+                }
+            } else {
+                getLinks()
+            }
         } else {
             state = .loading
             showsErrorButton = false
@@ -297,7 +319,11 @@ class Details: LoadingTableView {
             setButtonTitle("Requesting...")
 
             func install(_ additionalOptions: [AdditionalInstallationParameters: Any] = [:]) {
-                let installId = self.content.itemUoid.isEmpty ? sender.linkId : self.content.itemUoid
+                let installId: String = {
+                    if !self.content.installationTicket.isEmpty { return self.content.installationTicket }
+                    if !sender.linkId.isEmpty { return sender.linkId }
+                    return self.content.itemUoid.isEmpty ? self.content.itemId : self.content.itemUoid
+                }()
 
                 API.install(id: installId, type: self.contentType, additionalOptions: additionalOptions) { [weak self] error in
                     guard let self = self else { return }

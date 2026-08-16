@@ -73,11 +73,10 @@ extension Details {
 
     // Get content dynamically
     func getContent<T>(type: T.Type, trackid: String, success: @escaping (_ item: T) -> Void) where T: Item {
-        API.search(type: type, trackid: trackid, success: { [weak self] items in
-            guard let self = self else { return }
-            if let item = items.first { success(item) } else { self.showErrorMessage(text: "Not found".localized(), secondaryText: "Couldn't find content with id %@ in our database".localizedFormat(trackid)) }
+        API.getItem(type: type, identifier: trackid, success: { item in
+            success(item)
         }, fail: { error in
-            self.showErrorMessage(text: "Cannot connect".localized(), secondaryText: error)
+            self.showErrorMessage(text: "Not found".localized(), secondaryText: error)
         })
     }
 
@@ -125,7 +124,7 @@ extension Details {
 
         switch contentType {
         case .ios: if let app = content as? App {
-            details.append(DetailsExternalLink(text: "Developer Apps".localized(), devId: app.artistId.description, devName: app.seller))
+            details.append(DetailsExternalLink(text: "Developer Apps".localized(), devId: app.artistId == 0 ? app.seller : app.artistId.description, devName: app.seller))
             if !app.website.isEmpty { details.append(DetailsExternalLink(text: "Developer Website".localized(), url: content.itemWebsite)) }
             if !app.support.isEmpty { details.append(DetailsExternalLink(text: "Developer Support".localized(), url: content.itemSupport)) }
             if !app.publisher.isEmpty { details.append(DetailsPublisher(app.publisher)) }
@@ -147,6 +146,9 @@ extension Details {
     func getLinks() {
         let identifier = content.itemUoid.isEmpty ? content.itemId : content.itemUoid
         API.getLinks(type: contentType, trackid: identifier, success: { [weak self] items in
+            if self?.content.installationTicket.isEmpty == true, let ticket = items.first?.links.first?.id {
+                self?.content.installationTicket = ticket
+            }
             guard let self = self else { return }
 
             self.versions = items

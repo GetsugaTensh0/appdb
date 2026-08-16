@@ -26,5 +26,7 @@ struct Promotion: Mappable {
         trackid <- map["trackid"]
         name <- map["name"]
         image <- map["image"]
+        if image.isEmpty { image <- map["icon_uri"] }
+        if trackid == 0 { trackid <- map["universal_object_identifier"] }
     }
 }

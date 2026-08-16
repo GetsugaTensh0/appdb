@@ -16,15 +16,10 @@ extension API {
         let trackid: String = "1900000538"
         let currentVersion: String = Global.appVersion
 
-        API.search(type: CydiaApp.self, trackid: trackid, success: { apps in
-            if let app = apps.first {
-                if app.version.compare(currentVersion, options: .numeric) == .orderedDescending {
-                    API.getLinks(type: .cydia, trackid: trackid, success: { versions in
-                        if let firstLink = versions.first(where: { $0.number == app.version })?.links.first {
-                            success(app, firstLink.id)
-                        }
-                    }, fail: { _ in })
-                }
+        API.getItem(type: CydiaApp.self, identifier: trackid, success: { app in
+            if app.version.compare(currentVersion, options: .numeric) == .orderedDescending {
+                let installId = app.installationTicket.isEmpty ? (app.itemUoid.isEmpty ? trackid : app.itemUoid) : app.installationTicket
+                success(app, installId)
             }
         }, fail: { _ in })
     }

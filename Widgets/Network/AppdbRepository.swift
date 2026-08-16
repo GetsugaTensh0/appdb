@@ -56,9 +56,11 @@ struct AppdbSearchResource: APIResource {
         methodPath = "/v1.7/search_index/"
         queryItems = [
             URLQueryItem(name: "type", value: type(from: contentType)),
-            URLQueryItem(name: "price", value: price(from: contentPrice)),
-            URLQueryItem(name: "order", value: order(from: sortOrder))
+            URLQueryItem(name: "length", value: "25"),
+            URLQueryItem(name: "start", value: "0")
         ]
+        _ = contentPrice
+        _ = sortOrder
     }
 }
 

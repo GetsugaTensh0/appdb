@@ -73,6 +73,9 @@ class Book: Item {
         name <- map["name"]
         id <- map["id"]
         image <- map["image"]
+        if image.isEmpty { image <- map["icon_uri"] }
+        installationTicket <- map["installation_ticket"]
+        downloadTicket <- map["download_ticket"]
         price <- map["price"]
         categoryId <- map["genre_id"]
         author <- map["pname"]

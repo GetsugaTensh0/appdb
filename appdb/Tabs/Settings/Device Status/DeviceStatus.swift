@@ -174,6 +174,9 @@ class DeviceStatus: LoadingTableView {
 
     // Option to Fix or Retry command with given UUID
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        Messages.shared.showError(message: "Command retry/fix is not available in API v1.7".localized(), context: .viewController(self))
+        tableView.deselectRow(at: indexPath, animated: true)
+        let item = statuses[indexPath.row]
+        API.retryCommand(uuid: item.uuid)
+        Messages.shared.showSuccess(message: "Retry requested".localized(), context: .viewController(self))
     }
 }

@@ -16,17 +16,26 @@ class Item: Hashable, Mappable {
 
     var id: Int = 0
     var universalObjectIdentifier: String = ""
+    var installationTicket: String = ""
+    var downloadTicket: String = ""
 
     class func type() -> ItemType {
         .ios // Default implementation
     }
 
     static func == (lhs: Item, rhs: Item) -> Bool {
-        lhs.id == rhs.id // Default implementation
+        if !lhs.universalObjectIdentifier.isEmpty, !rhs.universalObjectIdentifier.isEmpty {
+            return lhs.universalObjectIdentifier == rhs.universalObjectIdentifier
+        }
+        return lhs.id == rhs.id
     }
 
     func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
+        if !universalObjectIdentifier.isEmpty {
+            hasher.combine(universalObjectIdentifier)
+        } else {
+            hasher.combine(id)
+        }
     }
 }
 

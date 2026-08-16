@@ -166,7 +166,7 @@ class Updates: LoadingTableView {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let apps = indexPath.section == 0 ? updateableApps : nonUpdateableApps
         let item = apps[indexPath.row]
-        let vc = Details(type: item.itemType, trackid: item.trackid)
+        let vc = Details(type: item.itemType, trackid: item.uoid.isEmpty ? item.trackid : item.uoid)
         if Global.isIpad {
             let nav = DismissableModalNavController(rootViewController: vc)
             nav.modalPresentationStyle = .formSheet

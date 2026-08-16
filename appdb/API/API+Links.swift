@@ -3,7 +3,7 @@
 //  appdb
 //
 //  Created by ned on 18/03/2017.
-//  Copyright Ã‚Â© 2017 ned. All rights reserved.
+//  Copyright © 2017 ned. All rights reserved.
 //
 
 import UIKit
@@ -12,150 +12,38 @@ import SwiftyJSON
 
 extension API {
 
+    static func versionsFromGateway(_ json: JSON, fallbackIdentifier: String) -> [Version] {
+        let object = json["data"]["object"]
+        let ticket = json["data"]["installation_ticket"].stringValue
+        let downloadTicket = json["data"]["download_ticket"].stringValue
+        let versionNumber = object["version"].stringValue.isEmpty ? Global.tilde : object["version"].stringValue
+        let host = object["source_name"].stringValue.isEmpty ? "appdb" : object["source_name"].stringValue
+        let developer = object["developer_name"].stringValue.isEmpty ? "appdb" : object["developer_name"].stringValue
+        let identifier = object["universal_object_identifier"].stringValue.isEmpty ? fallbackIdentifier : object["universal_object_identifier"].stringValue
+        let installable = !ticket.isEmpty || json["data"]["no_installation_ticket_failure_reason"].isEmpty
+
+        var version = Version(number: versionNumber)
+        version.links.append(Link(
+            link: downloadTicket.isEmpty ? "" : "ticket://\(downloadTicket)",
+            cracker: "appdb",
+            uploader: developer,
+            host: host,
+            id: ticket.isEmpty ? identifier : ticket,
+            verified: true,
+            di_compatible: true,
+            hidden: false,
+            is_compatible: installable,
+            isTicket: !downloadTicket.isEmpty,
+            incompatibility_reason: json["data"]["no_installation_ticket_failure_reason"]["translated"].stringValue
+        ))
+        return [version]
+    }
+
     static func getLinks(type: ItemType, trackid: String, success: @escaping (_ items: [Version]) -> Void, fail: @escaping (_ error: String) -> Void) {
-        AF.request(endpoint + Actions.getLinks.rawValue, parameters: ["type": type.rawValue, "trackids": trackid, "trackid": trackid, "id": trackid, "uoid": trackid, "lang": languageCode], headers: headersWithCookie)
-            .responseJSON { response in
-                switch response.result {
-                case .success(let value):
-
-                    let json = JSON(value)
-                    let data = json["data"]
-                    let trackData: JSON = {
-                        if !data[trackid].isEmpty { return data[trackid] }
-                        if !data["items"][trackid].isEmpty { return data["items"][trackid] }
-                        if !data["items"].isEmpty { return data["items"] }
-                        return data
-                    }()
-                    var versions: [Version] = []
-
-                    let queue = DispatchQueue(label: "it.ned.links_\(trackid)", attributes: .concurrent)
-
-                    queue.async {
-                        // No multiple keys for books
-                        if type == .books {
-                            let fetched: JSON = trackData[0]
-                            if !fetched.isEmpty {
-                                var version = Version(number: Global.tilde)
-                                for e in 0..<fetched.count {
-                                    let link: JSON = fetched[e]
-                                    var incompatibility_reason: String = ""
-                                    if link["is_compatible"]["reason"].exists() {
-                                        incompatibility_reason = link["is_compatible"]["reason"].stringValue
-                                    }
-                                    var report_reason: String = ""
-                                    if !link["reports"].isEmpty && link["reports"].arrayValue.first!["reason"].exists() {
-                                        report_reason = link["reports"].arrayValue.first!["reason"].stringValue
-                                    }
-                                    version.links.append(Link(
-                                        link: link["link"].stringValue,
-                                        cracker: link["cracker"].stringValue,
-                                        uploader: link["uploader_name"].stringValue,
-                                        host: link["host"].stringValue,
-                                        id: link["id"].stringValue,
-                                        verified: link["verified"].boolValue,
-                                        di_compatible: link["di_compatible"].intValue == 1,
-                                        hidden: link["is_hidden"] != "0",
-                                        is_compatible: link["is_compatible"]["result"] == "yes",
-                                        incompatibility_reason: incompatibility_reason,
-                                        report_reason: report_reason
-                                    ))
-                                }; versions.append(version)
-                            }
-                        } else {
-                            if let flatLinks = trackData.array, !flatLinks.isEmpty, flatLinks.first?["link"].exists() == true {
-                                var version = Version(number: Global.tilde)
-                                for link in flatLinks {
-                                    var incompatibility_reason: String = ""
-                                    if link["is_compatible"]["reason"].exists() {
-                                        incompatibility_reason = link["is_compatible"]["reason"].stringValue
-                                    }
-                                    var report_reason: String = ""
-                                    if !link["reports"].isEmpty && link["reports"].arrayValue.first?["reason"].exists() == true {
-                                        report_reason = link["reports"].arrayValue.first?["reason"].stringValue ?? ""
-                                    }
-                                    version.links.append(Link(
-                                        link: link["link"].stringValue,
-                                        cracker: link["cracker"].stringValue,
-                                        uploader: link["uploader_name"].stringValue,
-                                        host: link["host"].stringValue,
-                                        id: link["id"].stringValue,
-                                        verified: link["verified"].boolValue,
-                                        di_compatible: link["di_compatible"].intValue == 1,
-                                        hidden: link["is_hidden"] != "0",
-                                        is_compatible: link["is_compatible"]["result"] == "yes",
-                                        isTicket: link["link"].stringValue.starts(with: "ticket://"),
-                                        incompatibility_reason: incompatibility_reason,
-                                        report_reason: report_reason
-                                    ))
-                                }
-                                versions.append(version)
-                            }
-
-                            if versions.isEmpty {
-                                var keys: [String] = []
-                                for (key, _) in trackData where !trackData[key].isEmpty {
-                                    keys.append(key)
-                                }
-
-                                keys.sort { $0.compare($1, options: .numeric) == .orderedDescending }
-
-                                for key in keys {
-                                    var version = Version(number: key), fetched: JSON = trackData[key]
-                                    for e in 0..<fetched.count {
-                                        let link: JSON = fetched[e]
-                                        var incompatibility_reason: String = ""
-                                        if link["is_compatible"]["reason"].exists() {
-                                            incompatibility_reason = link["is_compatible"]["reason"].stringValue
-                                        }
-                                        var report_reason: String = ""
-                                        if !link["reports"].isEmpty && link["reports"].arrayValue.first!["reason"].exists() {
-                                            report_reason = link["reports"].arrayValue.first!["reason"].stringValue
-                                        }
-                                        version.links.append(Link(
-                                            link: link["link"].stringValue,
-                                            cracker: link["cracker"].stringValue,
-                                            uploader: link["uploader_name"].stringValue,
-                                            host: link["host"].stringValue,
-                                            id: link["id"].stringValue,
-                                            verified: link["verified"].boolValue,
-                                            di_compatible: link["di_compatible"].intValue == 1,
-                                            hidden: link["is_hidden"] != "0",
-                                            is_compatible: link["is_compatible"]["result"] == "yes",
-                                            isTicket: link["link"].stringValue.starts(with: "ticket://"),
-                                            incompatibility_reason: incompatibility_reason,
-                                            report_reason: report_reason
-                                        ))
-                                    }
-                                    versions.append(version)
-                                }
-                            }
-                        }
-
-                        if versions.isEmpty {
-                            var fallback = Version(number: Global.tilde)
-                            fallback.links.append(Link(
-                                link: "",
-                                cracker: "appdb",
-                                uploader: "appdb",
-                                host: "appdb",
-                                id: trackid,
-                                verified: true,
-                                di_compatible: true,
-                                hidden: false,
-                                is_compatible: true
-                            ))
-                            versions.append(fallback)
-                        }
-
-                        DispatchQueue.main.async {
-                            success(versions)
-                        }
-                    }
-
-                case .failure(let error):
-                    fail(error.localizedDescription)
-                }
-            }
+        _ = type
+        fetchGatewayObject(identifier: trackid, success: { json in
+            success(versionsFromGateway(json, fallbackIdentifier: trackid))
+        }, fail: fail)
     }
 
     static func reportLink(id: String, type: ItemType, reason: String, completion: @escaping (_ error: String?) -> Void) {

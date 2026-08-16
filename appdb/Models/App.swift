@@ -86,7 +86,10 @@ class App: Item {
         name <- map["name"]
         id <- map["id"]
         image <- map["image"]
+        if image.isEmpty { image <- map["icon_uri"] }
         bundleId <- map["bundle_id"]
+        installationTicket <- map["installation_ticket"]
+        downloadTicket <- map["download_ticket"]
         version <- map["version"]
         price <- map["price"]
         updated <- map["added"]

@@ -8,15 +8,24 @@
 
 import UIKit
 import Alamofire
+import SwiftyJSON
+import ObjectMapper
 
 extension API {
 
     static func getPromotions(success: @escaping (_ items: [Promotion]) -> Void, fail: @escaping (_ error: NSError) -> Void) {
         AF.request(endpoint + Actions.promotions.rawValue, parameters: ["lang": languageCode], headers: headers)
-            .responseArray(keyPath: "data") { (response: AFDataResponse<[Promotion]>) in
+            .responseJSON { response in
                 switch response.result {
-                case .success(let promotions):
-                    success(promotions)
+                case .success(let value):
+                    let json = JSON(value)
+                    if !json["success"].boolValue {
+                        fail(NSError(domain: "appdb", code: 0, userInfo: [NSLocalizedDescriptionKey: json["errors"][0]["translated"].stringValue]))
+                        return
+                    }
+                    let content = json["data"]["content"].arrayValue
+                    let items = Mapper<Promotion>().mapArray(JSONArray: content.map { $0.dictionaryObject ?? [:] })
+                    success(items)
                 case .failure(let error):
                     fail(error as NSError)
                 }

@@ -50,9 +50,9 @@ extension APIResource {
 extension APIResource {
     func type(from type: ContentType) -> String {
         switch type {
-        case .ios: return "ios"
-        case .cydia: return "cydia"
-        case .books: return "books"
+        case .ios: return "official_app"
+        case .cydia: return "user_app"
+        case .books: return "official_app"
         case .unknown: return ""
         }
     }
