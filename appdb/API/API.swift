@@ -28,6 +28,30 @@ enum API {
             "Cookie": "lt=\(Preferences.linkToken)"
         ]
     }
+
+    // 1.7 methods are POST application/x-www-form-urlencoded with a trailing slash.
+    // Authenticated calls require `lt` in the form body, not only a Cookie header.
+    // Spec: https://api.dbservices.to/v1.7/spec/
+    static func actionPath(_ action: Actions) -> String {
+        let name = action.rawValue.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+        return endpoint + name + "/"
+    }
+
+    static func formParameters(_ extra: [String: Any] = [:]) -> [String: Any] {
+        var params: [String: Any] = [
+            "lang": languageCode,
+            "brand": "appdb"
+        ]
+        if Preferences.deviceIsLinked, !Preferences.linkToken.isEmpty {
+            params["lt"] = Preferences.linkToken
+        }
+        for (key, value) in extra { params[key] = value }
+        return params
+    }
+
+    static func post(_ action: Actions, parameters: [String: Any] = [:]) -> DataRequest {
+        AF.request(actionPath(action), method: .post, parameters: formParameters(parameters), headers: headersWithCookie)
+    }
 }
 
 enum DeviceType: String {
@@ -138,6 +162,8 @@ enum Actions: String {
     case addDylib = "add_enhancement"
     case deleteDylib = "delete_enhancement"
     case getEnterpriseCerts = "get_enterprise_certs"
+    case cancelCommand = "cancel_command"
+    case retryCommand = "retry_command"
 }
 
 enum ConfigurationParameters: String {

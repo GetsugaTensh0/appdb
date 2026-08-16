@@ -12,9 +12,9 @@ import SwiftyJSON
 extension API {
 
     static func getUpdates(ticket: String = "", success: @escaping (_ items: [UpdateableApp]) -> Void, fail: @escaping (_ error: String, _ code: String) -> Void) {
-        var params: [String: Any] = ["lang": languageCode]
+        var params: [String: Any] = [:]
         if !ticket.isEmpty { params["t"] = ticket }
-        let request = AF.request(endpoint + Actions.getUpdates.rawValue, parameters: params, headers: headersWithCookie)
+        let request = post(.getUpdates, parameters: params)
 
         quickCheckForErrors(request, completion: { ok, hasError, errorCode in
             if ok {

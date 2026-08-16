@@ -200,12 +200,9 @@ extension API {
             return
         }
         // 1.7 resolves objects only by universal_object_identifier. `id` / `identifier` fail.
-        let params: [String: Any] = [
-            "lang": languageCode,
+        let request = post(.getLinks, parameters: [
             "universal_object_identifier": value
-        ]
-
-        let request = AF.request(endpoint + Actions.getLinks.rawValue, parameters: params, headers: headersWithCookie)
+        ])
         quickCheckForErrors(request, completion: { ok, hasError, _ in
             if ok {
                 request.responseJSON { response in

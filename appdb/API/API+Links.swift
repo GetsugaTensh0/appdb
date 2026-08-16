@@ -23,11 +23,12 @@ extension API {
         let installReason = strippedAPIMessage(json["data"]["no_installation_ticket_failure_reason"]["translated"].stringValue)
         let downloadReason = strippedAPIMessage(json["data"]["no_download_ticket_failure_reason"]["translated"].stringValue)
         let reason = downloadReason.isEmpty ? installReason : downloadReason
-        let hasTicket = !ticket.isEmpty || !downloadTicket.isEmpty
+        let ipaOnly = downloadTicket.hasPrefix("INSTALLABLE_IPA_DOWNLOAD_ONLY")
+        let hasTicket = !ticket.isEmpty || (!downloadTicket.isEmpty && !ipaOnly)
 
         var version = Version(number: versionNumber)
         version.links.append(Link(
-            link: downloadTicket.isEmpty ? "" : "ticket://\(downloadTicket)",
+            link: (downloadTicket.isEmpty || ipaOnly) ? "" : "ticket://\(downloadTicket)",
             cracker: "appdb",
             uploader: developer,
             host: host,
@@ -35,9 +36,10 @@ extension API {
             verified: true,
             di_compatible: true,
             hidden: false,
-            is_compatible: hasTicket,
-            isTicket: !downloadTicket.isEmpty,
-            incompatibility_reason: reason
+            is_compatible: hasTicket || ipaOnly,
+            isTicket: !downloadTicket.isEmpty && !ipaOnly,
+            incompatibility_reason: reason,
+            installAsIpaFile: ipaOnly
         ))
         return [version]
     }
@@ -63,7 +65,7 @@ extension API {
         // If I don't do this, '%3D' gets encoded to '%253D' which makes the ticket invalid
         ticket = ticket.replacingOccurrences(of: "%3D", with: "=")
 
-        AF.request(endpoint + Actions.processRedirect.rawValue, parameters: ["t": ticket, "lang": languageCode], headers: headersWithCookie)
+        post(.processRedirect, parameters: ["t": ticket])
             .responseJSON { response in
                 switch response.result {
                 case .success(let value):
@@ -82,7 +84,7 @@ extension API {
     }
 
     static func getPlainTextLink(rt: String, completion: @escaping (_ error: String?, _ link: String?) -> Void) {
-        AF.request(endpoint + Actions.processRedirect.rawValue, parameters: ["rt": rt, "lang": languageCode], headers: headersWithCookie)
+        post(.processRedirect, parameters: ["rt": rt])
             .responseJSON { response in
                 switch response.result {
                 case .success(let value):

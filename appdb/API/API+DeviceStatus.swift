@@ -13,7 +13,7 @@ import SwiftyJSON
 extension API {
 
     static func getDeviceStatus(success: @escaping (_ items: [DeviceStatusItem]) -> Void, fail: @escaping (_ error: NSError) -> Void) {
-        AF.request(endpoint + Actions.getStatus.rawValue, parameters: ["lang": languageCode], headers: headersWithCookie)
+        post(.getStatus)
             .responseArray(keyPath: "data") { (response: AFDataResponse<[DeviceStatusItem]>) in
                 switch response.result {
                 case .success(let results):
@@ -25,7 +25,7 @@ extension API {
     }
 
     static func emptyCommandQueue(success: @escaping () -> Void) {
-        AF.request(endpoint + Actions.clear.rawValue, parameters: ["lang": languageCode], headers: headersWithCookie)
+        post(.clear)
         .responseJSON { response in
             switch response.result {
             case .success:
@@ -37,12 +37,12 @@ extension API {
     }
 
     static func fixCommand(uuid: String) {
-        AF.request(endpoint + "cancel_command", parameters: ["uuid": uuid, "lang": languageCode], headers: headersWithCookie)
+        post(.cancelCommand, parameters: ["uuid": uuid])
             .responseJSON { _ in }
     }
 
     static func retryCommand(uuid: String) {
-        AF.request(endpoint + "retry_command", parameters: ["uuid": uuid, "lang": languageCode], headers: headersWithCookie)
+        post(.retryCommand, parameters: ["uuid": uuid])
             .responseJSON { _ in }
     }
 }

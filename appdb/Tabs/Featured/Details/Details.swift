@@ -260,7 +260,15 @@ class Details: LoadingTableView {
             let isClickable = contentType != .books && !link.hidden && !link.host.hasSuffix(".onion")
             guard isClickable else { return }
 
-            if link.isTicket {
+            if link.installAsIpaFile {
+                API.install(id: link.id.isEmpty ? content.itemUoid : link.id, type: contentType, asIpaFile: true) { error in
+                    if let error = error {
+                        Messages.shared.showError(message: error.prettified)
+                    } else {
+                        Messages.shared.showSuccess(message: "Installation has been queued to your device".localized())
+                    }
+                }
+            } else if link.isTicket {
                 API.getRedirectionTicket(t: link.link) { [weak self] error, rt, wait in
                     guard let self = self else { return }
                     if let error = error {
@@ -327,7 +335,8 @@ class Details: LoadingTableView {
                     return self.content.itemId
                 }()
 
-                API.install(id: installId, type: self.contentType, additionalOptions: additionalOptions) { [weak self] error in
+                let asIpaFile = self.versions.flatMap { $0.links }.contains { $0.installAsIpaFile && ($0.id == sender.linkId || $0.id == installId) }
+                API.install(id: installId, type: self.contentType, additionalOptions: additionalOptions, asIpaFile: asIpaFile) { [weak self] error in
                     guard let self = self else { return }
 
                     if let error = error {

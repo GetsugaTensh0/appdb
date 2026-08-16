@@ -13,7 +13,7 @@ import SwiftyJSON
 extension API {
 
     static func getInstallationOptions(success: @escaping (_ items: [InstallationOption]) -> Void, fail: @escaping (_ error: NSError) -> Void) {
-        AF.request(endpoint + Actions.getFeatures.rawValue, parameters: ["lang": languageCode], headers: headersWithCookie)
+        post(.getFeatures)
             .responseArray(keyPath: "data") { (response: AFDataResponse<[InstallationOption]>) in
                 switch response.result {
                 case .success(let installationOptions):
@@ -25,7 +25,11 @@ extension API {
     }
 
     private static func performInstall(parameters: [String: Any], completion: @escaping (_ error: String?) -> Void) {
-        AF.request(endpoint + Actions.install.rawValue, parameters: parameters, headers: headersWithCookie)
+        guard Preferences.deviceIsLinked, !Preferences.linkToken.isEmpty else {
+            completion("Please authorize app from Settings first".localized())
+            return
+        }
+        post(.install, parameters: parameters)
             .responseJSON { response in
                 switch response.result {
                 case .success(let value):
@@ -41,12 +45,12 @@ extension API {
             }
     }
 
-    static func install(id: String, type: ItemType, additionalOptions: [AdditionalInstallationParameters: Any] = [:], completion: @escaping (_ error: String?) -> Void) {
+    static func install(id: String, type: ItemType, additionalOptions: [AdditionalInstallationParameters: Any] = [:], asIpaFile: Bool = false, completion: @escaping (_ error: String?) -> Void) {
         var parameters: [String: Any] = [
-            "lang": languageCode,
             "type": type == .myAppstore ? "libraries" : "universal"
         ]
         for (key, value) in additionalOptions { parameters[key.rawValue] = value }
+        if asIpaFile { parameters["as_ipa_file"] = 1 }
 
         if type == .myAppstore {
             parameters["id"] = id
@@ -54,16 +58,31 @@ extension API {
             return
         }
 
-        // v1.7 deleted type=ios / type=cydia. Install is type=universal plus a ticket or UOID.
-        if isUniversalObjectIdentifier(id) {
-            parameters["universal_object_identifier"] = id
-        } else if !id.isEmpty {
-            parameters["installation_ticket"] = id
-        } else {
-            completion("Please authorize app from Settings first".localized())
+        func installWithTicket(_ ticket: String) {
+            guard !ticket.isEmpty else {
+                completion("Please authorize app from Settings first".localized())
+                return
+            }
+            var ticketParameters = parameters
+            ticketParameters["installation_ticket"] = ticket
+            performInstall(parameters: ticketParameters, completion: completion)
+        }
+
+        // Spec: /install/ takes installation_ticket from /universal_gateway/, not a UOID.
+        if !isUniversalObjectIdentifier(id), !id.isEmpty {
+            installWithTicket(id)
             return
         }
-        performInstall(parameters: parameters, completion: completion)
+
+        fetchGatewayObject(identifier: id, success: { json in
+            let ticket = json["data"]["installation_ticket"].stringValue
+            if ticket.isEmpty {
+                let reason = strippedAPIMessage(json["data"]["no_installation_ticket_failure_reason"]["translated"].stringValue)
+                completion(reason.isEmpty ? "Please authorize app from Settings first".localized() : reason)
+            } else {
+                installWithTicket(ticket)
+            }
+        }, fail: completion)
     }
 
     static func customInstall(ipaUrl: String, type: ItemType, iconUrl: String, bundleId: String, name: String, additionalOptions: [AdditionalInstallationParameters: Any] = [:], completion: @escaping (_ error: String?) -> Void) {

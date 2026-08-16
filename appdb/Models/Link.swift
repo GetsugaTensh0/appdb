@@ -34,8 +34,9 @@ struct Link {
     var diCompatible = false
     var hidden = false
     var isTicket = false
+    var installAsIpaFile = false
 
-    init(link: String, cracker: String, uploader: String, host: String, id: String, verified: Bool, di_compatible: Bool, hidden: Bool, is_compatible: Bool, isTicket: Bool = false, incompatibility_reason: String = "", report_reason: String = "") {
+    init(link: String, cracker: String, uploader: String, host: String, id: String, verified: Bool, di_compatible: Bool, hidden: Bool, is_compatible: Bool, isTicket: Bool = false, incompatibility_reason: String = "", report_reason: String = "", installAsIpaFile: Bool = false) {
         self.link = link
         self.cracker = cracker
         self.uploader = uploader
@@ -45,6 +46,7 @@ struct Link {
         self.diCompatible = di_compatible
         self.hidden = hidden
         self.isTicket = isTicket
+        self.installAsIpaFile = installAsIpaFile
 
         while self.cracker.hasPrefix(" ") { self.cracker = String(self.cracker.dropFirst()) }
         if self.cracker.isEmpty { self.cracker = "Unknown".localized() }
