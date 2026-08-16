@@ -125,8 +125,11 @@ class DetailsFullScreenshots: UIViewController {
                 width = round(view.bounds.width - (Global.Size.margin.value + off) * 2)
                 height = round(width * magic)
                 left = round((view.bounds.width - width) / 2)
-                top = round((view.bounds.height - (view.bounds.width - (Global.Size.margin.value + 20) * 2) * magic) / 2 + 23)
-                bottom = round((view.bounds.height - (view.bounds.width - (Global.Size.margin.value + 20) * 2) * magic) / 2 - 23)
+                let usableWidth = view.bounds.width - (Global.Size.margin.value + 20) * 2
+                let contentHeight = usableWidth * magic
+                let verticalPad = (view.bounds.height - contentHeight) / 2
+                top = round(verticalPad + 23)
+                bottom = round(verticalPad - 23)
             }
         } else {
             if allLandscape {
