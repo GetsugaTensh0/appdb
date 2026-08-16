@@ -14,14 +14,18 @@ struct RequestedApp: Matchable, Codable, Equatable {
     var status: String = ""
     var image: String = ""
     var bundleId: String = ""
+    var commandUuid: String = ""
+    var installationType: String = ""
 
-    init(type: ItemType, linkId: String, name: String, image: String, bundleId: String, status: String = "") {
+    init(type: ItemType, linkId: String, name: String, image: String, bundleId: String, status: String = "", commandUuid: String = "", installationType: String = "") {
         self.linkId = linkId
         self.type = type
         self.name = name
         self.image = image
         self.bundleId = bundleId
         self.status = status
+        self.commandUuid = commandUuid
+        self.installationType = installationType
     }
 
     func match(with object: Any) -> Match {

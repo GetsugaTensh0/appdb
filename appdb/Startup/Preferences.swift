@@ -38,6 +38,7 @@ extension Defaults.Keys {
     static let duplicateApp = Key<Bool>("duplicateApp", default: true)
     static let plusStatus = Key<String>("plus_account_status", default: "")
     static let plusStatusTranslated = Key<String>("plus_account_status_translated", default: "")
+    static let linkType = Key<String>("link_type", default: "")
 }
 
 // Sensitive data is stored in Keychain
@@ -219,6 +220,10 @@ enum Preferences {
 
     static var signingWith: String {
         defaults[.signingWith]
+    }
+
+    static var linkType: String {
+        defaults[.linkType]
     }
 
     static var optedOutFromEmails: Bool {

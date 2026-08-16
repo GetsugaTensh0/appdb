@@ -10,6 +10,12 @@ import UIKit
 import Alamofire
 import SwiftyJSON
 
+struct InstallResult {
+    let commandUuid: String
+    let installationType: String
+    let historyUuid: String
+}
+
 extension API {
 
     static func getInstallationOptions(success: @escaping (_ items: [InstallationOption]) -> Void, fail: @escaping (_ error: NSError) -> Void) {
@@ -24,9 +30,9 @@ extension API {
             }
     }
 
-    private static func performInstall(parameters: [String: Any], completion: @escaping (_ error: String?) -> Void) {
+    private static func performInstall(parameters: [String: Any], completion: @escaping (_ error: String?, _ result: InstallResult?) -> Void) {
         guard Preferences.deviceIsLinked, !Preferences.linkToken.isEmpty else {
-            completion("Please authorize app from Settings first".localized())
+            completion("Please authorize app from Settings first".localized(), nil)
             return
         }
         post(.install, parameters: parameters)
@@ -35,17 +41,22 @@ extension API {
                 case .success(let value):
                     let json = JSON(value)
                     if json["success"].boolValue {
-                        completion(nil)
+                        let data = json["data"]
+                        completion(nil, InstallResult(
+                            commandUuid: data["command_uuid"].stringValue,
+                            installationType: data["installation_type"].stringValue,
+                            historyUuid: data["installation_history_uuid"].stringValue
+                        ))
                     } else {
-                        completion(strippedAPIMessage(json["errors"][0]["translated"].stringValue))
+                        completion(strippedAPIMessage(json["errors"][0]["translated"].stringValue), nil)
                     }
                 case .failure(let error):
-                    completion(error.localizedDescription)
+                    completion(error.localizedDescription, nil)
                 }
             }
     }
 
-    static func install(id: String, type: ItemType, additionalOptions: [AdditionalInstallationParameters: Any] = [:], asIpaFile: Bool = false, completion: @escaping (_ error: String?) -> Void) {
+    static func install(id: String, type: ItemType, additionalOptions: [AdditionalInstallationParameters: Any] = [:], asIpaFile: Bool = false, completion: @escaping (_ error: String?, _ result: InstallResult?) -> Void) {
         var parameters: [String: Any] = [
             "type": type == .myAppstore ? "libraries" : "universal"
         ]
@@ -60,7 +71,7 @@ extension API {
 
         func installWithTicket(_ ticket: String) {
             guard !ticket.isEmpty else {
-                completion("Please authorize app from Settings first".localized())
+                completion("Please authorize app from Settings first".localized(), nil)
                 return
             }
             var ticketParameters = parameters
@@ -78,11 +89,11 @@ extension API {
             let ticket = json["data"]["installation_ticket"].stringValue
             if ticket.isEmpty {
                 let reason = strippedAPIMessage(json["data"]["no_installation_ticket_failure_reason"]["translated"].stringValue)
-                completion(reason.isEmpty ? "Please authorize app from Settings first".localized() : reason)
+                completion(reason.isEmpty ? "Please authorize app from Settings first".localized() : reason, nil)
             } else {
                 installWithTicket(ticket)
             }
-        }, fail: completion)
+        }, fail: { completion($0, nil) })
     }
 
     static func customInstall(ipaUrl: String, type: ItemType, iconUrl: String, bundleId: String, name: String, additionalOptions: [AdditionalInstallationParameters: Any] = [:], completion: @escaping (_ error: String?) -> Void) {
@@ -96,7 +107,7 @@ extension API {
         ]
         _ = type
         for (key, value) in additionalOptions { parameters[key.rawValue] = value }
-        performInstall(parameters: parameters, completion: completion)
+        performInstall(parameters: parameters) { error, _ in completion(error) }
     }
 
     static func requestInstallJB(plist: String, icon: String, link: String, completion: @escaping (_ error: String?) -> Void) {

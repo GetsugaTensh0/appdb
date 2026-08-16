@@ -12,8 +12,11 @@ import SwiftyJSON
 
 extension API {
 
-    static func getDeviceStatus(success: @escaping (_ items: [DeviceStatusItem]) -> Void, fail: @escaping (_ error: NSError) -> Void) {
-        post(.getStatus)
+    static func getDeviceStatus(uuids: [String] = [], sinceUuid: String = "", success: @escaping (_ items: [DeviceStatusItem]) -> Void, fail: @escaping (_ error: NSError) -> Void) {
+        var parameters: [String: Any] = [:]
+        if !uuids.isEmpty { parameters["uuids"] = uuids }
+        if !sinceUuid.isEmpty { parameters["since_uuid"] = sinceUuid }
+        post(.getStatus, parameters: parameters)
             .responseArray(keyPath: "data") { (response: AFDataResponse<[DeviceStatusItem]>) in
                 switch response.result {
                 case .success(let results):

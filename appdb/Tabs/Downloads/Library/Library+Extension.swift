@@ -280,7 +280,7 @@ extension Library {
                     if !sender.linkId.isEmpty { return sender.linkId }
                     return String(app.id)
                 }()
-                API.install(id: installId, type: .myAppstore, additionalOptions: additionalOptions) { [weak self] error in
+                API.install(id: installId, type: .myAppstore, additionalOptions: additionalOptions) { [weak self] error, result in
                     guard let self = self else { return }
 
                     if let error = error {
@@ -291,7 +291,7 @@ extension Library {
                                     delay(0.3) { setButtonTitle("Install") }
                                 } else {
                                     setButtonTitle("Requested")
-                                    Messages.shared.showSuccess(message: "Installation has been queued to your device".localized())
+                                    Messages.shared.showSuccess(message: "Signing started. Watch Downloads for progress.".localized())
                                     ObserveQueuedApps.shared.addApp(type: .myAppstore, linkId: installId, name: app.name, image: "", bundleId: app.bundleId)
                                     delay(5) { setButtonTitle("Install") }
                                 }
@@ -305,9 +305,9 @@ extension Library {
 
                         if #available(iOS 10.0, *) { UINotificationFeedbackGenerator().notificationOccurred(.success) }
 
-                        Messages.shared.showSuccess(message: "Installation has been queued to your device".localized())
+                        Messages.shared.showSuccess(message: "Signing started. Watch Downloads for progress.".localized())
 
-                        ObserveQueuedApps.shared.addApp(type: .myAppstore, linkId: installId, name: app.name, image: "", bundleId: app.bundleId)
+                        ObserveQueuedApps.shared.addApp(type: .myAppstore, linkId: installId, name: app.name, image: "", bundleId: app.bundleId, commandUuid: result?.commandUuid ?? "", installationType: result?.installationType ?? "")
 
                         delay(5) { setButtonTitle("Install") }
                     }

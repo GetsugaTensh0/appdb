@@ -163,7 +163,7 @@ class AppUpdateController: UITableViewController {
 
         setButtonTitle("Requesting...")
 
-        API.install(id: sender.linkId, type: .cydia) { [weak self] error in
+        API.install(id: sender.linkId, type: .cydia) { [weak self] error, result in
             guard let self = self else { return }
 
             if let error = error {
@@ -176,9 +176,9 @@ class AppUpdateController: UITableViewController {
 
                 if #available(iOS 10.0, *) { UINotificationFeedbackGenerator().notificationOccurred(.success) }
 
-                Messages.shared.showSuccess(message: "Installation has been queued to your device".localized())
+                Messages.shared.showSuccess(message: "Signing started. Watch Downloads for progress.".localized())
 
-                ObserveQueuedApps.shared.addApp(type: .cydia, linkId: sender.linkId, name: self.updatedApp.name, image: self.updatedApp.image, bundleId: self.updatedApp.bundleId)
+                ObserveQueuedApps.shared.addApp(type: .cydia, linkId: sender.linkId, name: self.updatedApp.name, image: self.updatedApp.image, bundleId: self.updatedApp.bundleId, commandUuid: result?.commandUuid ?? "", installationType: result?.installationType ?? "")
 
                 delay(5) { setButtonTitle("Install") }
             }

@@ -261,11 +261,12 @@ class Details: LoadingTableView {
             guard isClickable else { return }
 
             if link.installAsIpaFile {
-                API.install(id: link.id.isEmpty ? content.itemUoid : link.id, type: contentType, asIpaFile: true) { error in
+                API.install(id: link.id.isEmpty ? content.itemUoid : link.id, type: contentType, asIpaFile: true) { error, result in
                     if let error = error {
                         Messages.shared.showError(message: error.prettified)
                     } else {
-                        Messages.shared.showSuccess(message: "Installation has been queued to your device".localized())
+                        ObserveQueuedApps.shared.addApp(type: self.contentType, linkId: link.id.isEmpty ? self.content.itemUoid : link.id, name: self.content.itemName, image: self.content.itemIconUrl, bundleId: self.content.itemBundleId, commandUuid: result?.commandUuid ?? "", installationType: result?.installationType ?? "")
+                        Messages.shared.showSuccess(message: "Signing started. Watch Downloads for progress.".localized())
                     }
                 }
             } else if link.isTicket {
@@ -336,7 +337,7 @@ class Details: LoadingTableView {
                 }()
 
                 let asIpaFile = self.versions.flatMap { $0.links }.contains { $0.installAsIpaFile && ($0.id == sender.linkId || $0.id == installId) }
-                API.install(id: installId, type: self.contentType, additionalOptions: additionalOptions, asIpaFile: asIpaFile) { [weak self] error in
+                API.install(id: installId, type: self.contentType, additionalOptions: additionalOptions, asIpaFile: asIpaFile) { [weak self] error, result in
                     guard let self = self else { return }
 
                     if let error = error {
@@ -349,12 +350,14 @@ class Details: LoadingTableView {
 
                         if #available(iOS 10.0, *) { UINotificationFeedbackGenerator().notificationOccurred(.success) }
 
-                        Messages.shared.showSuccess(message: "Installation has been queued to your device".localized(), context: .viewController(self))
+                        Messages.shared.showSuccess(message: "Signing started. Watch Downloads for progress.".localized(), context: .viewController(self))
 
                         if self.contentType != .books {
                             ObserveQueuedApps.shared.addApp(type: self.contentType, linkId: installId,
                                                             name: self.content.itemName, image: self.content.itemIconUrl,
-                                                            bundleId: self.content.itemBundleId)
+                                                            bundleId: self.content.itemBundleId,
+                                                            commandUuid: result?.commandUuid ?? "",
+                                                            installationType: result?.installationType ?? "")
                         }
 
                         delay(5) {

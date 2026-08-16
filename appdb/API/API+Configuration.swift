@@ -25,7 +25,7 @@ extension API {
     }
 
     static func getConfiguration(success: @escaping () -> Void, fail: @escaping (_ error: String) -> Void) {
-        AF.request(endpoint + Actions.getConfiguration.rawValue, parameters: ["lang": languageCode], headers: headersWithCookie)
+        post(.getConfiguration)
             .responseJSON { response in
                 switch response.result {
                 case .success(let value):
@@ -70,6 +70,7 @@ extension API {
                             Preferences.set(.disableRevocationChecks, to: data["disable_protection_checks"].stringValue == "yes")
                             Preferences.set(.signingIdentityType, to: data["signing_identity_type"].stringValue)
                             Preferences.set(.optedOutFromEmails, to: data["is_opted_out_from_emails"].stringValue == "yes")
+                            Preferences.set(.linkType, to: data["link_type"].stringValue)
 
                             success()
                         // }, fail: { error in
