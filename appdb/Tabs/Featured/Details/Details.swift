@@ -277,14 +277,14 @@ class Details: LoadingTableView {
                         }
                     }
                 }
+            } else if let url = URL(string: link.link), !link.link.isEmpty {
+                let webVc = IPAWebViewController(delegate: self, url: url, appIcon: content.itemIconUrl)
+                let nav = IPAWebViewNavController(rootViewController: webVc)
+                present(nav, animated: true)
+            } else if !link.compatibility.isEmpty {
+                Messages.shared.showError(message: link.compatibility.prettified)
             } else {
-                if let url = URL(string: link.link) {
-                    let webVc = IPAWebViewController(delegate: self, url: url, appIcon: content.itemIconUrl)
-                    let nav = IPAWebViewNavController(rootViewController: webVc)
-                    present(nav, animated: true)
-                } else {
-                    Messages.shared.showError(message: "Error: malformed url".localized())
-                }
+                Messages.shared.showError(message: "Please authorize app from Settings first".localized())
             }
             return
         }
@@ -320,9 +320,11 @@ class Details: LoadingTableView {
 
             func install(_ additionalOptions: [AdditionalInstallationParameters: Any] = [:]) {
                 let installId: String = {
+                    if !self.content.itemUoid.isEmpty { return self.content.itemUoid }
+                    if API.isUniversalObjectIdentifier(sender.linkId) { return sender.linkId }
                     if !self.content.installationTicket.isEmpty { return self.content.installationTicket }
                     if !sender.linkId.isEmpty { return sender.linkId }
-                    return self.content.itemUoid.isEmpty ? self.content.itemId : self.content.itemUoid
+                    return self.content.itemId
                 }()
 
                 API.install(id: installId, type: self.contentType, additionalOptions: additionalOptions) { [weak self] error in

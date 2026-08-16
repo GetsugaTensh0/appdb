@@ -20,7 +20,10 @@ extension API {
         let host = object["source_name"].stringValue.isEmpty ? "appdb" : object["source_name"].stringValue
         let developer = object["developer_name"].stringValue.isEmpty ? "appdb" : object["developer_name"].stringValue
         let identifier = object["universal_object_identifier"].stringValue.isEmpty ? fallbackIdentifier : object["universal_object_identifier"].stringValue
-        let installable = !ticket.isEmpty || json["data"]["no_installation_ticket_failure_reason"].isEmpty
+        let installReason = strippedAPIMessage(json["data"]["no_installation_ticket_failure_reason"]["translated"].stringValue)
+        let downloadReason = strippedAPIMessage(json["data"]["no_download_ticket_failure_reason"]["translated"].stringValue)
+        let reason = downloadReason.isEmpty ? installReason : downloadReason
+        let hasTicket = !ticket.isEmpty || !downloadTicket.isEmpty
 
         var version = Version(number: versionNumber)
         version.links.append(Link(
@@ -32,9 +35,9 @@ extension API {
             verified: true,
             di_compatible: true,
             hidden: false,
-            is_compatible: installable,
+            is_compatible: hasTicket,
             isTicket: !downloadTicket.isEmpty,
-            incompatibility_reason: json["data"]["no_installation_ticket_failure_reason"]["translated"].stringValue
+            incompatibility_reason: reason
         ))
         return [version]
     }

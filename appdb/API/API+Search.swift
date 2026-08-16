@@ -12,16 +12,28 @@ import ObjectMapper
 import Foundation
 
 extension API {
+    static func isUniversalObjectIdentifier(_ value: String) -> Bool {
+        let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.count == 40 && trimmed.allSatisfy { $0.isHexDigit }
+    }
+
+    static func strippedAPIMessage(_ raw: String) -> String {
+        let text = raw.decoded.trimmingCharacters(in: .whitespacesAndNewlines)
+        return text.isEmpty ? raw : text
+    }
+
     static func v17ContentType(for type: ItemType) -> String? {
         switch type {
         case .ios:
-            return "official_app"
-        case .cydia:
+            // official_app is only ~20 titles published on appdb itself.
+            // The searchable iOS catalog lives in user_app.
             return "user_app"
+        case .cydia:
+            return "repo_app"
         case .books:
             return nil
         default:
-            return "official_app"
+            return "user_app"
         }
     }
 
@@ -154,12 +166,14 @@ extension API {
             "lang": languageCode,
             "compatibility": "ios"
         ]
-        if let contentType = v17ContentType(for: type) {
-            params["type"] = contentType
-        }
         let query = q.trimmingCharacters(in: .whitespacesAndNewlines)
         if !query.isEmpty {
             params["name"] = query.lowercased()
+        }
+        // Named search drops `type` so "youtube" hits user_app + repo_app + official_app.
+        // Empty browse keeps a type so Featured is not a random mix.
+        if query.isEmpty, let contentType = v17ContentType(for: type) {
+            params["type"] = contentType
         }
         if genre != "0", let genreId = Int(genre) {
             params["genre_id"] = genreId
@@ -180,15 +194,16 @@ extension API {
     }
 
     static func fetchGatewayObject(identifier: String, success: @escaping (_ json: JSON) -> Void, fail: @escaping (_ error: String) -> Void) {
-        var params: [String: Any] = ["lang": languageCode]
-        if identifier.allSatisfy({ $0.isNumber }), let numericId = Int(identifier) {
-            params["id"] = numericId
-        } else {
-            params["universal_object_identifier"] = identifier
+        let value = identifier.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !value.isEmpty else {
+            fail("Couldn't find content with id %@ in our database".localizedFormat(identifier))
+            return
         }
-        if identifier.count >= 16 {
-            params["universal_object_identifier"] = identifier
-        }
+        // 1.7 resolves objects only by universal_object_identifier. `id` / `identifier` fail.
+        let params: [String: Any] = [
+            "lang": languageCode,
+            "universal_object_identifier": value
+        ]
 
         let request = AF.request(endpoint + Actions.getLinks.rawValue, parameters: params, headers: headersWithCookie)
         quickCheckForErrors(request, completion: { ok, hasError, _ in

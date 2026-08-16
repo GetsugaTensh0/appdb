@@ -24,19 +24,6 @@ extension API {
             }
     }
 
-    private static func installType(for type: ItemType) -> String {
-        switch type {
-        case .myAppstore:
-            return "libraries"
-        case .cydia:
-            return "cydia"
-        case .ios:
-            return "ios"
-        default:
-            return "universal"
-        }
-    }
-
     private static func performInstall(parameters: [String: Any], completion: @escaping (_ error: String?) -> Void) {
         AF.request(endpoint + Actions.install.rawValue, parameters: parameters, headers: headersWithCookie)
             .responseJSON { response in
@@ -46,7 +33,7 @@ extension API {
                     if json["success"].boolValue {
                         completion(nil)
                     } else {
-                        completion(json["errors"][0]["translated"].stringValue)
+                        completion(strippedAPIMessage(json["errors"][0]["translated"].stringValue))
                     }
                 case .failure(let error):
                     completion(error.localizedDescription)
@@ -67,62 +54,16 @@ extension API {
             return
         }
 
-        func installWithTicket(_ ticket: String) {
-            var ticketParameters = parameters
-            ticketParameters["installation_ticket"] = ticket
-            ticketParameters["type"] = "universal"
-            performInstall(parameters: ticketParameters) { error in
-                guard let error = error else {
-                    completion(nil)
-                    return
-                }
-
-                var legacyParameters: [String: Any] = [
-                    "lang": languageCode,
-                    "type": installType(for: type),
-                    "id": id
-                ]
-                for (key, value) in additionalOptions { legacyParameters[key.rawValue] = value }
-                performInstall(parameters: legacyParameters) { legacyError in
-                    completion(legacyError ?? error)
-                }
-            }
-        }
-
-        if id.count >= 20, !id.allSatisfy({ $0.isHexDigit }) || id.count > 40 {
-            installWithTicket(id)
+        // v1.7 deleted type=ios / type=cydia. Install is type=universal plus a ticket or UOID.
+        if isUniversalObjectIdentifier(id) {
+            parameters["universal_object_identifier"] = id
+        } else if !id.isEmpty {
+            parameters["installation_ticket"] = id
+        } else {
+            completion("Please authorize app from Settings first".localized())
             return
         }
-
-        fetchGatewayObject(identifier: id, success: { json in
-            let ticket = json["data"]["installation_ticket"].stringValue
-            if ticket.isEmpty {
-                let reason = json["data"]["no_installation_ticket_failure_reason"]["translated"].stringValue
-                if reason.isEmpty {
-                    var legacyParameters: [String: Any] = [
-                        "lang": languageCode,
-                        "type": installType(for: type),
-                        "id": id
-                    ]
-                    for (key, value) in additionalOptions { legacyParameters[key.rawValue] = value }
-                    performInstall(parameters: legacyParameters, completion: completion)
-                } else {
-                    completion(reason)
-                }
-            } else {
-                installWithTicket(ticket)
-            }
-        }, fail: { error in
-            var legacyParameters: [String: Any] = [
-                "lang": languageCode,
-                "type": installType(for: type),
-                "id": id
-            ]
-            for (key, value) in additionalOptions { legacyParameters[key.rawValue] = value }
-            performInstall(parameters: legacyParameters) { legacyError in
-                completion(legacyError ?? error)
-            }
-        })
+        performInstall(parameters: parameters, completion: completion)
     }
 
     static func customInstall(ipaUrl: String, type: ItemType, iconUrl: String, bundleId: String, name: String, additionalOptions: [AdditionalInstallationParameters: Any] = [:], completion: @escaping (_ error: String?) -> Void) {

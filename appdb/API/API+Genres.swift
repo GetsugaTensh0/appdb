@@ -92,15 +92,18 @@ extension API {
     }
 
     static func getIcon(id: String, type: ItemType, completion: @escaping (String) -> Void) {
-        let contentType: String = {
-            switch type {
-            case .ios: return "official_app"
-            case .cydia: return "custom_app"
-            case .books: return "book"
-            default: return "official_app"
-            }
-        }()
-        AF.request(endpoint + Actions.search.rawValue, parameters: ["content_type": contentType, "genre": id, "order": Order.all.rawValue, "length": 1, "start": 0, "lang": languageCode], headers: headers)
+        var parameters: [String: Any] = [
+            "length": 1,
+            "start": 0,
+            "lang": languageCode
+        ]
+        if let contentType = v17ContentType(for: type) {
+            parameters["type"] = contentType
+        }
+        if id != "0", let genreId = Int(id) {
+            parameters["genre_id"] = genreId
+        }
+        AF.request(endpoint + Actions.search.rawValue, parameters: parameters, headers: headers)
             .responseJSON { response in
                 switch response.result {
                 case .success(let value):

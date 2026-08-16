@@ -163,7 +163,11 @@ extension Details {
 
             // Enable links segment
             self.loadedLinks = true
-        }, fail: { _ in })
+        }, fail: { [weak self] error in
+            guard let self = self else { return }
+            self.loadedLinks = true
+            Messages.shared.showError(message: error.prettified, context: .viewController(self))
+        })
     }
 
     @objc func dismissAnimated() { dismiss(animated: true) }
