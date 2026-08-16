@@ -6,6 +6,7 @@
 //  Copyright Ã‚Â© 2016 ned. All rights reserved.
 //
 
+import Foundation
 import Alamofire
 import SwiftyJSON
 import Localize_Swift
