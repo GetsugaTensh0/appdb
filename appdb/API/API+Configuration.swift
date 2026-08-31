@@ -35,7 +35,9 @@ extension API {
                     } else {
 
                         let data = json["data"]
-                        // checkRevocation(completion: { isRevoked, revokedOn in
+                        // v1.7 removed plus_/pro_ properties from get_configuration.
+                        // Use get_subscriptions / get_purchases for subscription status.
+                        // The fields below fall back to empty/false when absent.
                             Preferences.set(.ignoreCompatibility, to: data["ignore_compatibility"].stringValue == "yes")
                             Preferences.set(.askForInstallationOptions, to: data["ask_for_installation_options"].stringValue == "yes")
 

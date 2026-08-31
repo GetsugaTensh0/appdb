@@ -164,6 +164,8 @@ enum Actions: String {
     case deleteDylib = "delete_enhancement"
     case getEnterpriseCerts = "get_enterprise_certs"
     case cancelCommand = "cancel_command"
+    case getSubscriptions = "get_subscriptions"
+    case getPurchases = "get_purchases"
 }
 
 enum ConfigurationParameters: String {
