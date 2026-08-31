@@ -164,11 +164,9 @@ enum Actions: String {
     case deleteDylib = "delete_enhancement"
     case getEnterpriseCerts = "get_enterprise_certs"
     case cancelCommand = "cancel_command"
-    case retryCommand = "retry_command"
 }
 
 enum ConfigurationParameters: String {
-    case appsync = "params[appsync]"
     case ignoreCompatibility = "params[ignore_compatibility]"
     case askForOptions = "params[ask_for_installation_options]"
     case clearDevEntity = "params[clear_developer_entity]"

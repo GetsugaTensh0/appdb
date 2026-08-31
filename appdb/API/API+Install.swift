@@ -193,7 +193,7 @@ extension API {
     }
 
     static func requestInstallJB(plist: String, icon: String, link: String, completion: @escaping (_ error: String?) -> Void) {
-        AF.request(endpoint + Actions.customInstall.rawValue, method: .post, parameters: ["plist": plist, "icon": icon, "link": link, "lang": languageCode], headers: headersWithCookie)
+        post(.customInstall, parameters: ["plist": plist, "icon": icon, "link": link])
             .responseJSON { response in
                 switch response.result {
                 case .success(let value):

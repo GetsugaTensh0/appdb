@@ -12,7 +12,7 @@ import Alamofire
 extension API {
 
     static func getNews(limit: Int = 10, success: @escaping (_ items: [SingleNews]) -> Void, fail: @escaping (_ error: NSError) -> Void) {
-        AF.request(endpoint + Actions.getPages.rawValue, parameters: ["category": Actions.newsCategory.rawValue, "lang": languageCode, "length": String(limit)], headers: headers)
+        post(.getPages, parameters: ["category": Actions.newsCategory.rawValue, "length": String(limit)])
             .responseArray(keyPath: "data") { (response: AFDataResponse<[SingleNews]>) in
                 switch response.result {
                 case .success(let news):
@@ -24,7 +24,7 @@ extension API {
     }
 
     static func getNewsDetail(id: String, success: @escaping (_ item: SingleNews) -> Void, fail: @escaping (_ error: NSError) -> Void) {
-        AF.request(endpoint + Actions.getPages.rawValue, parameters: ["category": Actions.newsCategory.rawValue, "lang": languageCode, "id": id], headers: headers)
+        post(.getPages, parameters: ["category": Actions.newsCategory.rawValue, "id": id])
         .responseObject(keyPath: "data") { (response: AFDataResponse<SingleNews>) in
             switch response.result {
             case .success(let singleNews):

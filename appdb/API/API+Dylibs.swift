@@ -13,7 +13,7 @@ import SwiftyJSON
 extension API {
 
     static func getDylibs(success: @escaping (_ items: [String]) -> Void, fail: @escaping (_ error: String) -> Void) {
-        AF.request(endpoint + Actions.getDylibs.rawValue, parameters: ["lang": languageCode], headers: headersWithCookie)
+        post(.getDylibs)
             .responseJSON { response in
                 switch response.result {
                 case .success(let value):
@@ -35,7 +35,7 @@ extension API {
     }
 
     static func addDylib(url: String, success: @escaping () -> Void, fail: @escaping (_ error: String) -> Void) {
-        AF.request(endpoint + Actions.addDylib.rawValue, parameters: ["url": url, "lang": languageCode], headers: headersWithCookie)
+        post(.addDylib, parameters: ["url": url])
             .responseJSON { response in
                 switch response.result {
                 case .success(let value):
@@ -56,7 +56,7 @@ extension API {
 
         request(AF.upload(multipartFormData: { multipartFormData in
             multipartFormData.append(fileURL, withName: "dylib")
-        }, to: endpoint + Actions.addDylib.rawValue, method: .post, headers: headersWithCookie).responseJSON { response in
+        }, to: actionPath(.addDylib), method: .post, headers: headersWithCookie).responseJSON { response in
 
             switch response.result {
             case .success(let value):
@@ -73,7 +73,7 @@ extension API {
     }
 
     static func deleteDylib(name: String, success: @escaping () -> Void, fail: @escaping (_ error: String) -> Void) {
-        AF.request(endpoint + Actions.deleteDylib.rawValue, parameters: ["name": name, "enhancement": name, "lang": languageCode], headers: headersWithCookie)
+        post(.deleteDylib, parameters: ["name": name, "enhancement": name])
             .responseJSON { response in
                 switch response.result {
                 case .success(let value):

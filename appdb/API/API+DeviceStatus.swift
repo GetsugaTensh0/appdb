@@ -46,7 +46,7 @@ extension API {
     }
 
     static func retryCommand(uuid: String) {
-        post(.retryCommand, parameters: ["uuid": uuid])
+        post(.cancelCommand, parameters: ["uuid": uuid])
             .responseJSON { _ in }
     }
 }
