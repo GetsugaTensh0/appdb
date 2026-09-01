@@ -59,7 +59,7 @@ class Library: LoadingCollectionView {
 
         loadContent()
         if timer == nil {
-            timer = Timer.scheduledTimer(timeInterval: 1.5, target: self, selector: #selector(loadContent), userInfo: nil, repeats: true)
+            timer = Timer.scheduledTimer(timeInterval: 10, target: self, selector: #selector(loadContent), userInfo: nil, repeats: true)
         }
     }
 

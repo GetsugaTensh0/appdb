@@ -30,18 +30,14 @@ extension API {
                             }
                         }
 
-                        // Cleanup mismatch versions
-                        for item in items {
-                            var new = item.versionNew
-                            var old = item.versionOld
-                            new = new.replacingOccurrences(of: " ", with: "")
-                            old = old.replacingOccurrences(of: " ", with: "")
+                        items.removeAll { item in
+                            var new = item.versionNew.replacingOccurrences(of: " ", with: "")
+                            var old = item.versionOld.replacingOccurrences(of: " ", with: "")
                             if new.hasPrefix("v") { new = String(new.dropFirst()) }
                             if old.hasPrefix("v") { old = String(old.dropFirst()) }
-                            if new.compare(old, options: .numeric) != .orderedDescending {
-                                debugLog("found mismatch for \(item.name): new: \(new), old: \(old). Removing...")
-                                items.remove(at: items.firstIndex(of: item)!)
-                            }
+                            let mismatch = new.compare(old, options: .numeric) != .orderedDescending
+                            if mismatch { debugLog("found mismatch for \(item.name): new: \(new), old: \(old). Removing...") }
+                            return mismatch
                         }
                         success(items)
                     case .failure(let error):

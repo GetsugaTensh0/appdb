@@ -44,7 +44,7 @@ class ObserveDownloadingApps {
             self.onAdded?(app!)
 
             // Increase Downloads badge
-            UIApplication.shared.keyWindow?.rootViewController?.badgeAddOne(for: .downloads)
+            Global.mainWindow?.rootViewController?.badgeAddOne(for: .downloads)
 
             // Notify updates
             self.numberOfDownloadingApps += 1
@@ -69,7 +69,7 @@ class ObserveDownloadingApps {
 
     func removeDownload() {
         // Decrease Downloads badge
-        UIApplication.shared.keyWindow?.rootViewController?.badgeSubtractOne(for: .downloads)
+        Global.mainWindow?.rootViewController?.badgeSubtractOne(for: .downloads)
 
         // Notify updates
         numberOfDownloadingApps -= 1

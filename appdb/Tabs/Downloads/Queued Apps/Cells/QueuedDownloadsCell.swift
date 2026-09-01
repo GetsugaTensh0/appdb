@@ -21,6 +21,9 @@ class QueuedDownloadsCell: UICollectionViewCell {
     func configure(with app: RequestedApp) {
         name.text = app.name
         status.text = app.status
+        accessibilityLabel = app.name
+        accessibilityValue = app.status
+        isAccessibilityElement = true
         if app.type != .myAppstore {
             if let url = URL(string: app.image) {
                 icon.af.setImage(withURL: url, placeholderImage: #imageLiteral(resourceName: "placeholderIcon"), filter: Global.roundedFilter(from: iconSize),

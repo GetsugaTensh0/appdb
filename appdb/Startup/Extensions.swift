@@ -374,7 +374,7 @@ extension UITableViewCell {
 // MARK: - UIApplication top View Controller & top Navigation View Controller
 
 extension UIApplication {
-    class func topViewController(_ viewController: UIViewController? = UIApplication.shared.keyWindow?.rootViewController) -> UIViewController? {
+    class func topViewController(_ viewController: UIViewController? = Global.mainWindow?.rootViewController) -> UIViewController? {
         if let nav = viewController as? UINavigationController {
             return topViewController(nav.visibleViewController)
         }
@@ -389,7 +389,7 @@ extension UIApplication {
         return viewController
     }
 
-    class func topNavigation(_ viewController: UIViewController? = UIApplication.shared.keyWindow?.rootViewController) -> UINavigationController? {
+    class func topNavigation(_ viewController: UIViewController? = Global.mainWindow?.rootViewController) -> UINavigationController? {
         if let nav = viewController as? UINavigationController {
             return nav
         }

@@ -44,10 +44,10 @@ class ObserveQueuedApps {
 
         if timer == nil {
             updateAppsStatus()
-            timer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(self.updateAppsStatus), userInfo: nil, repeats: true)
+            timer = Timer.scheduledTimer(timeInterval: 2, target: self, selector: #selector(self.updateAppsStatus), userInfo: nil, repeats: true)
         }
 
-        UIApplication.shared.keyWindow?.rootViewController?.badgeAddOne(for: .downloads)
+        Global.mainWindow?.rootViewController?.badgeAddOne(for: .downloads)
 
         numberOfQueuedApps += 1
         let numberOfQueuedAppsDict: [String: Int] = ["number": numberOfQueuedApps, "tab": 0]
@@ -58,7 +58,7 @@ class ObserveQueuedApps {
         if let index = requestedApps.lastIndex(where: { $0.linkId == linkId || $0.commandUuid == linkId }) {
             requestedApps.remove(at: index)
 
-            UIApplication.shared.keyWindow?.rootViewController?.badgeSubtractOne(for: .downloads)
+            Global.mainWindow?.rootViewController?.badgeSubtractOne(for: .downloads)
 
             numberOfQueuedApps -= 1
             let numberOfQueuedAppsDict: [String: Int] = ["number": numberOfQueuedApps, "tab": 0]
@@ -73,7 +73,7 @@ class ObserveQueuedApps {
     func removeAllApps() {
         self.requestedApps = []
 
-        UIApplication.shared.keyWindow?.rootViewController?.updateBadge(with: nil, for: .downloads)
+        Global.mainWindow?.rootViewController?.updateBadge(with: nil, for: .downloads)
 
         numberOfQueuedApps = 0
         let numberOfQueuedAppsDict: [String: Int] = ["number": numberOfQueuedApps, "tab": 0]
@@ -90,19 +90,15 @@ class ObserveQueuedApps {
         guard !requestedApps.isEmpty else { return }
 
         let commandUuids = requestedApps.map { $0.commandUuid }.filter { !$0.isEmpty }
-        API.getDeviceStatus(success: { [weak self] items in
-            self?.ingest(items)
-        }, fail: { _ in })
 
         if !commandUuids.isEmpty {
             API.getDeviceStatus(uuids: commandUuids, success: { [weak self] items in
                 self?.ingest(items)
             }, fail: { _ in })
-            if let first = commandUuids.first {
-                API.getDeviceStatus(sinceUuid: first, success: { [weak self] items in
-                    self?.ingest(items)
-                }, fail: { _ in })
-            }
+        } else {
+            API.getDeviceStatus(success: { [weak self] items in
+                self?.ingest(items)
+            }, fail: { _ in })
         }
     }
 
@@ -112,25 +108,30 @@ class ObserveQueuedApps {
 
     func openInstallPrompt(manifest: String, linkId: String = "") {
         guard !manifest.isEmpty, let url = itmsURL(from: manifest) else {
-            Messages.shared.showError(message: "Install file is not ready yet".localized())
+            DispatchQueue.main.async {
+                Messages.shared.showError(message: "Install file is not ready yet".localized())
+            }
             return
         }
-        UIApplication.shared.open(url, options: [:], completionHandler: { [weak self] success in
-            if success {
-                if !linkId.isEmpty {
-                    self?.updateStatus(linkId: linkId, status: "Install prompt sent".localized())
+        DispatchQueue.main.async {
+            UIApplication.shared.open(url, options: [:], completionHandler: { [weak self] success in
+                if success {
+                    if !linkId.isEmpty {
+                        self?.updateStatus(linkId: linkId, status: "Install prompt sent".localized())
+                    }
+                } else if let https = URL(string: manifest), https.scheme == "https" {
+                    UIApplication.shared.open(https)
+                } else {
+                    Messages.shared.showError(message: "Unable to open the iOS install prompt".localized())
                 }
-            } else if let https = URL(string: manifest), https.scheme == "https" {
-                UIApplication.shared.open(https)
-            } else {
-                Messages.shared.showError(message: "Unable to open the iOS install prompt".localized())
-            }
-        })
+            })
+        }
     }
 
     private func ingest(_ items: [DeviceStatusItem]) {
         guard !items.isEmpty else { return }
-        for app in requestedApps {
+        let apps = requestedApps
+        for app in apps {
             let matches = matchingItems(for: app, in: items)
             if matches.isEmpty {
                 if let ready = items.first(where: { !$0.manifestUri.isEmpty && self.looksRelated($0, to: app) }) {

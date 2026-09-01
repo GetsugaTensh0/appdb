@@ -124,9 +124,20 @@ enum Global {
 
     static let isRtl: Bool = UIApplication.shared.userInterfaceLayoutDirection == .rightToLeft
 
+    static var mainWindow: UIWindow? {
+        if #available(iOS 13.0, *) {
+            return UIApplication.shared.connectedScenes
+                .compactMap { $0 as? UIWindowScene }
+                .flatMap { $0.windows }
+                .first { $0.isKeyWindow }
+        } else {
+            return UIApplication.shared.keyWindow
+        }
+    }
+
     static var hasNotch: Bool {
         if #available(iOS 11, *) {
-            guard let window = UIApplication.shared.keyWindow else { return false }
+            guard let window = mainWindow else { return false }
             let insets = window.safeAreaInsets
             return insets.top > 0 || insets.bottom > 0
         } else {

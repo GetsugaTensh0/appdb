@@ -388,6 +388,10 @@ extension Library {
 
     internal func deleteLocalIpa(ipa: LocalIPAFile, indexPath: IndexPath) {
         IPAFileManager.shared.delete(file: ipa)
+        guard localIpas.indices.contains(indexPath.row) else {
+            loadContent()
+            return
+        }
         localIpas.remove(at: indexPath.row)
         collectionView.deleteItems(at: [indexPath])
         if localIpas.isEmpty {

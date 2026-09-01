@@ -185,8 +185,10 @@ extension Details {
 
     // Setting the right estimated height for rows with dynamic content helps with tableview jumping issues
     override func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {
+        guard indexPath.section > 1 else { return 32 }
         switch indexForSegment {
         case .details:
+            guard details.indices.contains(indexPath.row) else { return 32 }
             if details[indexPath.row] is DetailsDescription {
                 return 145 ~~ 135
             } else if details[indexPath.row] is DetailsChangelog {

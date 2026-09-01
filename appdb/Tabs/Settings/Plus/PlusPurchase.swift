@@ -107,10 +107,11 @@ class PlusPurchase: LoadingTableView {
         guard purchaseOptions.indices.contains(indexPath.row) else { return }
         let purchaseOption = purchaseOptions[indexPath.row]
         if purchaseOption.html.isEmpty {
-            UIApplication.shared.open(URL(string: purchaseOption.link)!, options: [:], completionHandler: nil)
+            guard let url = URL(string: purchaseOption.link) else { return }
+            UIApplication.shared.open(url, options: [:], completionHandler: nil)
         } else {
             let purchaseWeb = PlusPurchaseWeb(with: purchaseOption)
-            navigationController!.pushViewController(purchaseWeb, animated: true)
+            navigationController?.pushViewController(purchaseWeb, animated: true)
             purchaseWeb.loadWebView()
         }
         tableView.deselectRow(at: indexPath, animated: true)

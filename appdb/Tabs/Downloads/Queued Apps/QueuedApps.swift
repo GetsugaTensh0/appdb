@@ -50,23 +50,12 @@ class QueuedApps: LoadingCollectionView {
 
     private func updateCollection(with apps: [RequestedApp]) {
         if !requestedApps.isEmpty || !apps.isEmpty {
-            // Perform diff
             let diff = Diff(from: requestedApps, to: apps)
             let animated = requestedApps.isEmpty
 
-            // Update collection view
-            collectionView.performBatchUpdates({
-                requestedApps = apps
-                if !isDone { state = .done(animated: animated) }
-
-                for index in diff.deleted { collectionView.deleteItems(at: [IndexPath(row: index, section: 0)]) }
-                for index in diff.inserted { collectionView.insertItems(at: [IndexPath(row: index, section: 0)]) }
-                for match in diff.matches {
-                    if match.changed && match.from == match.to {
-                        collectionView.reloadItems(at: [IndexPath(row: match.from, section: 0)])
-                    }
-                }
-            })
+            requestedApps = apps
+            if !isDone { state = .done(animated: animated) }
+            collectionView.reloadData()
 
             if requestedApps.isEmpty {
                 setErrorMessageIfEmpty()
@@ -78,8 +67,9 @@ class QueuedApps: LoadingCollectionView {
 
     private func setErrorMessageIfEmpty() {
         let noQueuesMessage = "No queued downloads".localized()
+        let hint = "Install an app to see signing progress here".localized()
         if case LoadingCollectionView.State.error(noQueuesMessage, _, _) = state {} else {
-            state = .error(first: noQueuesMessage, second: "", animated: false)
+            state = .error(first: noQueuesMessage, second: hint, animated: false)
         }
     }
 

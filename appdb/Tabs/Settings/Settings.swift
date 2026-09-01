@@ -82,18 +82,20 @@ class Settings: TableViewController {
         dataSource = DataSource(tableViewDelegate: self)
         refreshSources()
 
-        // Refresh link code & configuration parameters
         func reloadConfiguration() {
             if Preferences.deviceIsLinked {
                 API.getLinkCode(success: {
                     API.getConfiguration(success: { [weak self] in
                         guard let self = self else { return }
-                        self.refreshSources()
-                    }, fail: { _ in })
+                        API.refreshSubscriptionStatus {
+                            self.refreshSources()
+                        }
+                    }, fail: { [weak self] _ in
+                        self?.refreshSources()
+                    })
                 }, fail: { [weak self] error in
                     guard let self = self else { return }
 
-                    // Profile has been removed, so let's deauthorize the app as well
                     if error == "NO_DEVICE_LINKED" {
                         self.deauthorize()
                     }
