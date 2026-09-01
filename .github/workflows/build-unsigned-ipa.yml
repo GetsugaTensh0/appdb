@@ -3,7 +3,7 @@ name: Build Unsigned IPA
 on:
   workflow_dispatch:
   push:
-    branches: [ master ]
+    branches: [ master, cursor/fix-queued-downloads-stuck-b194 ]
     paths:
       - 'appdb/**'
       - 'Widgets/**'
