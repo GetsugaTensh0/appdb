@@ -25,11 +25,11 @@ extension AppdbRepository {
 
 extension AppdbRepository {
     func fetchAPIResource<Resource>(_ resource: Resource) -> AnyPublisher<Resource.Response, APIError> where Resource: APIResource {
-        guard let url = resource.url else {
-            let error = APIError.invalidRequest(description: "Invalid `resource.url`: \(String(describing: resource.url))")
+        guard let postURL = resource.postURL else {
+            let error = APIError.invalidRequest(description: "Invalid `resource.postURL`: \(String(describing: resource.postURL))")
             return Fail(error: error).eraseToAnyPublisher()
         }
-        return fetch(url: url)
+        return post(url: postURL, formItems: resource.queryItems ?? [])
             .flatMap(decode)
             .eraseToAnyPublisher()
     }

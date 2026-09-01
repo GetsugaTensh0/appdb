@@ -13,7 +13,7 @@ import SwiftyJSON
 extension API {
 
     static func getIPACacheStatus(success: @escaping (_ status: IPACacheStatus) -> Void, fail: @escaping (_ error: NSError) -> Void) {
-        AF.request(endpoint + Actions.getIpaCacheStatus.rawValue, parameters: ["lang": languageCode], headers: headersWithCookie)
+        post(.getIpaCacheStatus)
             .responseObject(keyPath: "data") { (response: AFDataResponse<IPACacheStatus>) in
                 switch response.result {
                 case .success(let result):

@@ -46,7 +46,7 @@ extension API {
     }
 
     static func deleteIpa(id: String, completion: @escaping (_ error: String?) -> Void) {
-        AF.request(endpoint + Actions.deleteIpa.rawValue, parameters: ["id": id, "uoid": id, "lang": languageCode], headers: headersWithCookie)
+        post(.deleteIpa, parameters: ["id": id, "uoid": id])
             .responseJSON { response in
                 switch response.result {
                 case .success(let value):
@@ -72,7 +72,7 @@ extension API {
             for (key, value) in parameters {
                 multipartFormData.append(value.data(using: String.Encoding.utf8)!, withName: key)
             }
-        }, to: endpoint + Actions.addIpa.rawValue, method: .post, headers: headersWithCookie).responseJSON { response in
+        }, to: actionPath(.addIpa), method: .post, headers: headersWithCookie).responseJSON { response in
 
             switch response.result {
             case .success(let value):
@@ -89,7 +89,7 @@ extension API {
     }
 
     static func analyzeJob(jobId: String, completion: @escaping (_ error: String?) -> Void) {
-        AF.request(endpoint + Actions.analyzeIpa.rawValue, parameters: ["lang": languageCode], headers: headersWithCookie)
+        post(.analyzeIpa)
             .responseJSON { response in
                 switch response.result {
                 case .success(let value):

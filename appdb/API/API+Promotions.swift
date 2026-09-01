@@ -14,7 +14,7 @@ import ObjectMapper
 extension API {
 
     static func getPromotions(success: @escaping (_ items: [Promotion]) -> Void, fail: @escaping (_ error: NSError) -> Void) {
-        AF.request(endpoint + Actions.promotions.rawValue, parameters: ["lang": languageCode], headers: headers)
+        post(.promotions)
             .responseJSON { response in
                 switch response.result {
                 case .success(let value):

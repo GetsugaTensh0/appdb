@@ -13,7 +13,7 @@ import SwiftyJSON
 extension API {
 
     static func getEnterpriseCerts(success: @escaping (_ items: [EnterpriseCertificate]) -> Void, fail: @escaping (_ error: NSError) -> Void) {
-        AF.request(endpoint + Actions.getEnterpriseCerts.rawValue, parameters: ["lang": languageCode], headers: headersWithCookie)
+        post(.getEnterpriseCerts)
             .responseArray(keyPath: "data") { (response: AFDataResponse<[EnterpriseCertificate]>) in
                 switch response.result {
                 case .success(let certs):
@@ -35,7 +35,9 @@ extension API {
                     } else {
 
                         let data = json["data"]
-                        // checkRevocation(completion: { isRevoked, revokedOn in
+                        // v1.7 removed plus_/pro_ properties from get_configuration.
+                        // Use get_subscriptions / get_purchases for subscription status.
+                        // The fields below fall back to empty/false when absent.
                             Preferences.set(.ignoreCompatibility, to: data["ignore_compatibility"].stringValue == "yes")
                             Preferences.set(.askForInstallationOptions, to: data["ask_for_installation_options"].stringValue == "yes")
 
@@ -84,10 +86,10 @@ extension API {
     }
 
     static func setConfiguration(params: [ConfigurationParameters: String], success: @escaping () -> Void, fail: @escaping (_ error: String) -> Void) {
-        var parameters: [String: Any] = ["lang": languageCode]
+        var parameters: [String: Any] = [:]
         for (key, value) in params { parameters[key.rawValue] = value }
 
-        AF.request(endpoint + Actions.configure.rawValue, parameters: parameters, headers: headersWithCookie)
+        post(.configure, parameters: parameters)
             .responseJSON { response in
                 switch response.result {
                 case .success(let value):
@@ -98,7 +100,6 @@ extension API {
                         // Update values
                         for (key, value) in params {
                             switch key {
-                            case .appsync: Preferences.set(.appsync, to: value == "yes")
                             case .askForOptions: Preferences.set(.askForInstallationOptions, to: value == "yes")
                             case .ignoreCompatibility: Preferences.set(.ignoreCompatibility, to: value == "yes")
                             case .disableProtectionChecks: Preferences.set(.disableRevocationChecks, to: value == "yes")

@@ -27,6 +27,24 @@ extension Repository {
             .map(\.data)
             .eraseToAnyPublisher()
     }
+
+    func post(url: URL, formItems: [URLQueryItem]) -> AnyPublisher<Data, APIError> {
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
+        var components = URLComponents()
+        components.queryItems = formItems
+        request.httpBody = components.query?.data(using: .utf8)
+        return session.dataTaskPublisher(for: request)
+            .mapError { error in
+                if error.code.rawValue == -1009 {
+                    return .offline
+                }
+                return .network(code: error.code.rawValue, description: error.localizedDescription)
+            }
+            .map(\.data)
+            .eraseToAnyPublisher()
+    }
 }
 
 protocol APIResource {
@@ -43,6 +61,14 @@ extension APIResource {
         components.host = serverPath
         components.path = methodPath
         components.queryItems = queryItems
+        return components.url
+    }
+
+    var postURL: URL? {
+        var components = URLComponents()
+        components.scheme = "https"
+        components.host = serverPath
+        components.path = methodPath
         return components.url
     }
 }

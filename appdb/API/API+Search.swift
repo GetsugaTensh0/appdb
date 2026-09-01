@@ -258,7 +258,7 @@ extension API {
         }
 
         let params = searchIndexParameters(type: T.type(), order: order, price: price, genre: genre, dev: dev, q: q, page: page)
-        let request = AF.request(endpoint + Actions.search.rawValue, parameters: params, headers: headers)
+        let request = post(.search, parameters: params)
 
         quickCheckForErrors(request, completion: { ok, hasError, _ in
             if ok {
@@ -283,7 +283,7 @@ extension API {
         var params = searchIndexParameters(type: type, order: .all, price: .all, genre: "0", dev: "0", q: query, page: 1)
         params["length"] = maxResults
         params["start"] = 0
-        AF.request(endpoint + Actions.search.rawValue, parameters: params, headers: headers)
+        post(.search, parameters: params)
             .responseJSON { response in
                 if let value = try? response.result.get() {
                     let data = JSON(value)["data"]
@@ -319,7 +319,7 @@ extension API {
         var params = searchIndexParameters(type: type, order: order, price: .all, genre: "0", dev: "0", q: "", page: 1)
         params["length"] = maxResults
         params["start"] = 0
-        AF.request(endpoint + Actions.search.rawValue, parameters: params, headers: headers)
+        post(.search, parameters: params)
             .responseJSON { response in
                 switch response.result {
                 case .success(let value):

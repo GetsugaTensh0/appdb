@@ -14,7 +14,7 @@ extension API {
     // MARK: - Genres
 
     static func listGenres(completion: @escaping () -> Void) {
-        AF.request(endpoint + Actions.listGenres.rawValue, parameters: ["lang": languageCode], headers: headers)
+        post(.listGenres)
             .responseJSON { response in
                 switch response.result {
                 case .success(let value):
@@ -103,7 +103,7 @@ extension API {
         if id != "0", let genreId = Int(id) {
             parameters["genre_id"] = genreId
         }
-        AF.request(endpoint + Actions.search.rawValue, parameters: parameters, headers: headers)
+        post(.search, parameters: parameters)
             .responseJSON { response in
                 switch response.result {
                 case .success(let value):

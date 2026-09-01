@@ -12,7 +12,7 @@ import SwiftyJSON
 extension API {
 
     static func activateVoucher(voucher: String, success: @escaping () -> Void, fail: @escaping (_ error: String) -> Void) {
-        AF.request(endpoint + Actions.activatePro.rawValue, parameters: ["voucher": voucher, "lang": languageCode], headers: headersWithCookie)
+        post(.activatePro, parameters: ["voucher": voucher])
         .responseJSON { response in
             switch response.result {
             case .success(let value):
@@ -29,7 +29,7 @@ extension API {
     }
 
     static func validateVoucher(voucher: String, success: @escaping () -> Void, fail: @escaping (_ error: String) -> Void) {
-        AF.request(endpoint + Actions.validatePro.rawValue, parameters: ["voucher": voucher, "lang": languageCode], headers: headersWithCookie)
+        post(.validatePro, parameters: ["voucher": voucher])
         .responseJSON { response in
             switch response.result {
             case .success(let value):
