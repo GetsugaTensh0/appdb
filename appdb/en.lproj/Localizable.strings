@@ -500,3 +500,8 @@
 
 "Alternate icons seem to not work on this device" = "Alternate icons seem to not work on this device";
 "App icon was set to '%@'" = "App icon was set to '%@'";
+
+// v1.7+ additions
+"Install an app to see signing progress here" = "Install an app to see signing progress here";
+"Command cancelled" = "Command cancelled";
+"This feature is no longer available" = "This feature is no longer available";

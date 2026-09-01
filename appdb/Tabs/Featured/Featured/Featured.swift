@@ -88,6 +88,9 @@ class Featured: LoadingTableView, UIPopoverPresentationControllerDelegate {
 
     // MARK: - Load Initial Data
 
+    private var readyRetries = 0
+    private let maxReadyRetries = 100
+
     func reloadTableWhenReady() {
         let itemCells = cells.compactMap {$0 as? ItemCollection}
         if itemCells.count != (itemCells.filter {$0.response.success == true}.count) {
@@ -95,11 +98,13 @@ class Featured: LoadingTableView, UIPopoverPresentationControllerDelegate {
                 let error = first.response.errorDescription
                 showErrorMessage(text: "Cannot connect".localized(), secondaryText: error)
 
-                // Button target action to retry loading
                 refreshButton.addTarget(self, action: #selector(self.retry), for: .touchUpInside)
-            } else {
-                // Not ready, retrying in 0.3 seconds
+            } else if readyRetries < maxReadyRetries {
+                readyRetries += 1
                 delay(0.3) { self.reloadTableWhenReady() }
+            } else {
+                showErrorMessage(text: "Cannot connect".localized(), secondaryText: "Request timed out".localized())
+                refreshButton.addTarget(self, action: #selector(self.retry), for: .touchUpInside)
             }
         } else {
             // If i don't do this here, stuff breaks :(
@@ -160,6 +165,7 @@ class Featured: LoadingTableView, UIPopoverPresentationControllerDelegate {
 
     @objc func retry() {
         state = .loading
+        readyRetries = 0
 
         delay(0.3) {
             // Retry all network operations

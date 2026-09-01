@@ -25,19 +25,6 @@ extension API {
     }
 
     static func reinstallEverything(success: @escaping () -> Void, fail: @escaping (_ error: String) -> Void) {
-        fail("Reinstall from cache was removed in API v1.7".localized())
-    }
-
-    static func clearIpaCache(success: @escaping () -> Void) {
-        success()
-    }
-
-    static func deleteIpaFromCache(bundleId: String, success: @escaping () -> Void) {
-        _ = bundleId
-        success()
-    }
-
-    static func revalidateIpaCache(success: @escaping () -> Void) {
-        success()
+        fail("This feature is no longer available".localized())
     }
 }

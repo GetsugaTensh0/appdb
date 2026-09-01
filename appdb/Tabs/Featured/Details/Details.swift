@@ -138,11 +138,11 @@ class Details: LoadingTableView {
 
     override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         switch indexPath.section {
-        case 0: return header[indexPath.row].height
+        case 0: return header.indices.contains(indexPath.row) ? header[indexPath.row].height : 0
         case 1: return 0
         default:
             switch indexForSegment {
-            case .details: return details[indexPath.row].height
+            case .details: return details.indices.contains(indexPath.row) ? details[indexPath.row].height : 0
             case .reviews: return indexPath.row == content.itemReviews.count ? UITableView.automaticDimension : DetailsReview.height
             case .download:
                 if versions.isEmpty { return DetailsDownloadEmptyCell.height }
@@ -158,12 +158,12 @@ class Details: LoadingTableView {
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         switch indexPath.section {
-        case 0: return header[indexPath.row]
+        case 0: return header.indices.contains(indexPath.row) ? header[indexPath.row] : UITableViewCell()
         case 1: return UITableViewCell()
         default:
             switch indexForSegment {
             case .details:
-                // DetailsDescription and DetailsChangelog need to be dynamic to have smooth expand
+                guard details.indices.contains(indexPath.row) else { return UITableViewCell() }
                 if details[indexPath.row] is DetailsDescription {
                     if let cell = tableView.dequeueReusableCell(withIdentifier: "description", for: indexPath) as? DetailsDescription {
                         cell.desc.collapsed = descriptionCollapsed

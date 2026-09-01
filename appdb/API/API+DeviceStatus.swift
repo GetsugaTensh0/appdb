@@ -40,12 +40,7 @@ extension API {
         }
     }
 
-    static func fixCommand(uuid: String) {
-        post(.cancelCommand, parameters: ["uuid": uuid])
-            .responseJSON { _ in }
-    }
-
-    static func retryCommand(uuid: String) {
+    static func cancelCommand(uuid: String) {
         post(.cancelCommand, parameters: ["uuid": uuid])
             .responseJSON { _ in }
     }

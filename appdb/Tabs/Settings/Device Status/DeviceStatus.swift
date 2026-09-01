@@ -12,7 +12,7 @@ class DeviceStatus: LoadingTableView {
 
     var didEndRefreshing = false
     var timer: Timer?
-    let refreshEvery: Double = 1.5
+    let refreshEvery: Double = 3
 
     var statuses: [DeviceStatusItem] = [] {
         didSet {
@@ -179,7 +179,7 @@ class DeviceStatus: LoadingTableView {
             ObserveQueuedApps.shared.openInstallPrompt(manifest: item.manifestUri, linkId: item.uuid)
             return
         }
-        API.retryCommand(uuid: item.uuid)
-        Messages.shared.showSuccess(message: "Retry requested".localized(), context: .viewController(self))
+        API.cancelCommand(uuid: item.uuid)
+        Messages.shared.showSuccess(message: "Command cancelled".localized(), context: .viewController(self))
     }
 }
