@@ -64,6 +64,10 @@ class ObserveQueuedApps {
             let numberOfQueuedAppsDict: [String: Int] = ["number": numberOfQueuedApps, "tab": 0]
             NotificationCenter.default.post(name: .UpdateQueuedSegmentTitle, object: self, userInfo: numberOfQueuedAppsDict)
         }
+        if requestedApps.isEmpty {
+            timer?.invalidate()
+            timer = nil
+        }
     }
 
     func removeAllApps() {
@@ -169,15 +173,17 @@ class ObserveQueuedApps {
             let message = item.statusText.isEmpty ? item.status : parseLatestStatus(from: item)
             Messages.shared.showError(message: message.isEmpty ? "Installation failed, but can be fixed from Settings -> Device Status".localized() : message)
             updateStatus(linkId: app.commandUuid.isEmpty ? app.linkId : app.commandUuid, status: message.isEmpty ? "Failed".localized() : message)
-            if !usesItms {
-                removeApp(linkId: app.linkId)
-            }
+            removeApp(linkId: app.linkId)
             return
         }
 
         if !item.manifestUri.isEmpty {
-            updateStatus(linkId: app.commandUuid.isEmpty ? app.linkId : app.commandUuid, status: "Signed. Tap to install.".localized())
+            let linkKey = app.commandUuid.isEmpty ? app.linkId : app.commandUuid
+            updateStatus(linkId: linkKey, status: "Signed. Tap to install.".localized())
             offerInstall(from: item, app: app)
+            if ["ok", "done", "success"].contains(item.status.lowercased()) {
+                removeApp(linkId: app.linkId)
+            }
             return
         }
 
@@ -198,7 +204,7 @@ class ObserveQueuedApps {
             return
         }
 
-        if !usesItms, item.type == "install_app", !ignoredInstallAppsUUIDs.contains(item.uuid) {
+        if item.type == "install_app", !ignoredInstallAppsUUIDs.contains(item.uuid) {
             ignoredInstallAppsUUIDs.append(item.uuid)
             removeApp(linkId: app.linkId)
         }
