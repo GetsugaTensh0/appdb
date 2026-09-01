@@ -3,7 +3,7 @@ name: Build Unsigned IPA
 on:
   workflow_dispatch:
   push:
-    branches: [ master ]
+    branches: [ master, cursor/polish-and-fixes-4d3f ]
     paths:
       - 'appdb/**'
       - 'Widgets/**'
