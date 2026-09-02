@@ -33,6 +33,8 @@ extension LinkedDevice: Mappable {
         linkToken <- map["link_token"]
         iosVersion <- map["ios_version"]
         name <- map["name"]
-        isPro = map["is_pro"].value() == "yes"
+        let proValue: String? = map["is_pro"].value()
+        let plusValue: String? = map["is_plus"].value()
+        isPro = proValue == "yes" || plusValue == "yes"
     }
 }

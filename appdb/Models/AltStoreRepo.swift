@@ -26,6 +26,7 @@ struct AltStoreRepo: Mappable {
     var addedAt: String = ""
     var lastCheckedAt: String = ""
     var contents: AltStoreRepoContents?
+    var contentsUri: String = ""
     var apps: [AltStoreApp]? = []
 
     enum Status: String {
@@ -47,8 +48,15 @@ struct AltStoreRepo: Mappable {
         statusTranslated <- map["status_translated"]
         totalApps <- map["total_apps"]
         addedAt <- map["added_at"]
+        if addedAt.isEmpty, let intDate = map.JSON["added_at"] as? Int {
+            addedAt = String(intDate)
+        }
         lastCheckedAt <- map["last_checked_at"]
+        if lastCheckedAt.isEmpty, let intDate = map.JSON["last_checked_at"] as? Int {
+            lastCheckedAt = String(intDate)
+        }
         contents <- map["contents"]
+        contentsUri <- map["contents_uri"]
         isPublic <- map["is_public"]
         apps = contents?.apps
 

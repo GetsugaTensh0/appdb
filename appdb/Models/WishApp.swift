@@ -44,11 +44,21 @@ struct WishApp: Mappable {
         trackid <- map["trackid"]
         version <- map["version"]
         image <- map["image"]
+        if image.isEmpty { image <- map["icon_uri"] }
         name <- map["name"]
         requestersAmount <- map["requesters_amount"]
+        if requestersAmount.isEmpty, let intVal = map.JSON["requesters_amount"] as? Int {
+            requestersAmount = String(intVal)
+        }
         price <- map["price"]
+        if price.isEmpty, let intVal = map.JSON["price"] as? Int {
+            price = String(intVal)
+        }
         statusString <- map["status"]
         statusChangedAt <- map["status_changed_at"]
+        if statusChangedAt.isEmpty, let intDate = map.JSON["status_changed_at"] as? Int {
+            statusChangedAt = String(intDate)
+        }
         bundleId <- map["bundle_id"]
 
         name = name.decoded
