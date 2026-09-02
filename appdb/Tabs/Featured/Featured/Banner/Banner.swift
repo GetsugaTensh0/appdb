@@ -44,8 +44,8 @@ extension Banner: UICollectionViewDelegate, UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         switch banners[indexPath.row % banners.count] {
         case "tweaked_apps_banner": UIApplication.shared.open(URL(string: "appdb-ios://?tab=custom_apps")!)
-        case "unc0ver_banner": UIApplication.shared.open(URL(string: "appdb-ios://?trackid=1900000487&type=cydia")!)
-        case "delta_banner": UIApplication.shared.open(URL(string: "appdb-ios://?trackid=1900000176&type=cydia")!)
+        case "unc0ver_banner": UIApplication.shared.open(URL(string: "appdb-ios://?trackid=076aeba87b437a6e3e13aaf62d256888929eb70c&type=cydia")!)
+        case "delta_banner": UIApplication.shared.open(URL(string: "appdb-ios://?trackid=7ad74a7de8c16653814a4247805b58b20ad9852b&type=cydia")!)
         default: break
         }
         TelemetryManager.send(Global.Telemetry.clickedBanner.rawValue)

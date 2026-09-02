@@ -25,16 +25,18 @@ struct WishApp: Mappable {
     var status: Status = .new
     var statusChangedAt: String = ""
     var bundleId: String = ""
+    var fulfilledUoid: String = ""
 
     enum Status: String {
         case cracking, fulfilled, failed, new
+        case taken, ipa_provided, uploading
 
         var prettified: String {
             switch self {
             case .new: return "New".localized()
-            case .cracking: return "⚙︎ " + "Processing".localized()
+            case .cracking, .taken, .uploading: return "⚙︎ " + "Processing".localized()
             case .failed: return "𐄂 " + "Failed".localized()
-            case .fulfilled: return "✓ " + "Fulfilled".localized()
+            case .fulfilled, .ipa_provided: return "✓ " + "Fulfilled".localized()
             }
         }
     }
@@ -60,6 +62,7 @@ struct WishApp: Mappable {
             statusChangedAt = String(intDate)
         }
         bundleId <- map["bundle_id"]
+        fulfilledUoid <- map["fulfilled_universal_object_identifier"]
 
         name = name.decoded
 
