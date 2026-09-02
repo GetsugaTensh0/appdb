@@ -56,6 +56,11 @@ extension API {
 
         request(AF.upload(multipartFormData: { multipartFormData in
             multipartFormData.append(fileURL, withName: "dylib")
+            if Preferences.deviceIsLinked, !Preferences.linkToken.isEmpty {
+                multipartFormData.append(Preferences.linkToken.data(using: .utf8)!, withName: "lt")
+            }
+            multipartFormData.append(languageCode.data(using: .utf8)!, withName: "lang")
+            multipartFormData.append("appdb".data(using: .utf8)!, withName: "brand")
         }, to: actionPath(.addDylib), method: .post, headers: headersWithCookie).responseJSON { response in
 
             switch response.result {

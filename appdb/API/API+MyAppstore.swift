@@ -63,9 +63,14 @@ extension API {
     }
 
     static func addToMyAppStore(jobId: String, fileURL: URL, request: @escaping (_ r: Alamofire.UploadRequest) -> Void, completion: @escaping (_ error: String?) -> Void) {
-        let parameters = [
-            "job_id": jobId
+        var parameters = [
+            "job_id": jobId,
+            "lang": languageCode,
+            "brand": "appdb"
         ]
+        if Preferences.deviceIsLinked, !Preferences.linkToken.isEmpty {
+            parameters["lt"] = Preferences.linkToken
+        }
 
         request(AF.upload(multipartFormData: { multipartFormData in
             multipartFormData.append(fileURL, withName: "ipa")
