@@ -505,3 +505,6 @@
 "Install an app to see signing progress here" = "Install an app to see signing progress here";
 "Command cancelled" = "Command cancelled";
 "This feature is no longer available" = "This feature is no longer available";
+"Voucher activation is no longer available in API v1.7. Use subscription options instead." = "Voucher activation is no longer available in API v1.7. Use subscription options instead.";
+"Voucher validation is no longer available in API v1.7. Use subscription options instead." = "Voucher validation is no longer available in API v1.7. Use subscription options instead.";
+"Email link code is no longer available in API v1.7. Use the link code shown in Settings instead." = "Email link code is no longer available in API v1.7. Use the link code shown in Settings instead.";

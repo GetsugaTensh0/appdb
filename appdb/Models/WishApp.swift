@@ -25,16 +25,18 @@ struct WishApp: Mappable {
     var status: Status = .new
     var statusChangedAt: String = ""
     var bundleId: String = ""
+    var fulfilledUoid: String = ""
 
     enum Status: String {
         case cracking, fulfilled, failed, new
+        case taken, ipa_provided, uploading
 
         var prettified: String {
             switch self {
             case .new: return "New".localized()
-            case .cracking: return "⚙︎ " + "Processing".localized()
+            case .cracking, .taken, .uploading: return "⚙︎ " + "Processing".localized()
             case .failed: return "𐄂 " + "Failed".localized()
-            case .fulfilled: return "✓ " + "Fulfilled".localized()
+            case .fulfilled, .ipa_provided: return "✓ " + "Fulfilled".localized()
             }
         }
     }
@@ -44,12 +46,23 @@ struct WishApp: Mappable {
         trackid <- map["trackid"]
         version <- map["version"]
         image <- map["image"]
+        if image.isEmpty { image <- map["icon_uri"] }
         name <- map["name"]
         requestersAmount <- map["requesters_amount"]
+        if requestersAmount.isEmpty, let intVal = map.JSON["requesters_amount"] as? Int {
+            requestersAmount = String(intVal)
+        }
         price <- map["price"]
+        if price.isEmpty, let intVal = map.JSON["price"] as? Int {
+            price = String(intVal)
+        }
         statusString <- map["status"]
         statusChangedAt <- map["status_changed_at"]
+        if statusChangedAt.isEmpty, let intDate = map.JSON["status_changed_at"] as? Int {
+            statusChangedAt = String(intDate)
+        }
         bundleId <- map["bundle_id"]
+        fulfilledUoid <- map["fulfilled_universal_object_identifier"]
 
         name = name.decoded
 

@@ -39,7 +39,17 @@ class MyAppStoreApp: Item {
         version <- map["bundle_version"]
         uploadedAt <- map["uploaded_at"]
         size <- map["size"]
-        apiIdentifier <- map["id"]
+        if size.isEmpty, let intSize = map.JSON["size"] as? Int {
+            size = String(intSize)
+        }
+        if size.isEmpty {
+            size <- map["size_hr"]
+        }
+        if let intId = map.JSON["id"] as? Int {
+            apiIdentifier = String(intId)
+        } else {
+            apiIdentifier <- map["id"]
+        }
         universalObjectIdentifier <- map["universal_object_identifier"]
         if let ticketInt = map.JSON["installation_ticket"] as? Int {
             installationTicket = String(ticketInt)
@@ -59,6 +69,9 @@ class MyAppStoreApp: Item {
         }
         if link.isEmpty {
             link <- map["download_link"]
+        }
+        if uploadedAt.isEmpty, let intDate = map.JSON["uploaded_at"] as? Int {
+            uploadedAt = String(intDate)
         }
 
         if let int64size = Int64(size) {

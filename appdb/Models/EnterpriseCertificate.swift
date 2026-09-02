@@ -25,6 +25,9 @@ extension EnterpriseCertificate: Mappable {
 
     mutating func mapping(map: Map) {
         id <- map["id"]
+        if id.isEmpty, let intId = map.JSON["id"] as? Int {
+            id = String(intId)
+        }
         name <- map["name"]
     }
 }

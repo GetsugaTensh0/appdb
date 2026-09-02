@@ -57,7 +57,9 @@ struct AppdbSearchResource: APIResource {
         queryItems = [
             URLQueryItem(name: "type", value: type(from: contentType)),
             URLQueryItem(name: "length", value: "25"),
-            URLQueryItem(name: "start", value: "0")
+            URLQueryItem(name: "start", value: "0"),
+            URLQueryItem(name: "lang", value: "en"),
+            URLQueryItem(name: "brand", value: "appdb")
         ]
         _ = contentPrice
         _ = sortOrder
@@ -81,7 +83,9 @@ struct AppdbNewsResource: APIResource {
         methodPath = "/v1.7/get_pages/"
         queryItems = [
             URLQueryItem(name: "category", value: "news"),
-            URLQueryItem(name: "length", value: "8")
+            URLQueryItem(name: "length", value: "8"),
+            URLQueryItem(name: "lang", value: "en"),
+            URLQueryItem(name: "brand", value: "appdb")
         ]
     }
 }

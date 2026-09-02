@@ -193,20 +193,9 @@ extension API {
     }
 
     static func requestInstallJB(plist: String, icon: String, link: String, completion: @escaping (_ error: String?) -> Void) {
-        post(.customInstall, parameters: ["plist": plist, "icon": icon, "link": link])
-            .responseJSON { response in
-                switch response.result {
-                case .success(let value):
-                    let json = JSON(value)
-                    if !json["success"].boolValue {
-                        completion(json["errors"][0]["translated"].stringValue)
-                    } else {
-                        completion(nil)
-                    }
-                case .failure(let error):
-                    completion(error.localizedDescription)
-                }
-            }
+        performInstall(parameters: ["type": "universal", "plist": plist, "image": icon, "link": link]) { error, _ in
+            completion(error)
+        }
     }
 
     static func getPlistFromItmsHelper(bundleId: String, localIpaUrlString: String, title: String, completion: @escaping (_ plistUrl: String?) -> Void) {

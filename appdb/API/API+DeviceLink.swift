@@ -14,13 +14,12 @@ extension API {
 
     static func linkAutomaticallyUsingUDID(success: @escaping () -> Void, fail: @escaping () -> Void) {
 
-        // Get UDID from managed configuration
         guard let deviceUdid = UserDefaults.standard.dictionary(forKey: "com.apple.configuration.managed")?["dbservicesUDID"] as? String else {
             fail()
             return
         }
 
-        AF.request(actionPath(.getLinkToken), method: .post, parameters: formParameters(["udid": deviceUdid, "client": "appdb unofficial client"]), headers: headers)
+        post(.link, parameters: ["type": "link", "email": "", "udid": deviceUdid, "client": "appdb unofficial client"])
             .responseJSON { response in
                 switch response.result {
                 case .success(let value):
@@ -29,24 +28,27 @@ extension API {
                     if !json["success"].boolValue {
                         fail()
                     } else {
-                        let linkToken = json["data"].stringValue
+                        let linkToken = json["data"]["link_token"].stringValue
+                        guard !linkToken.isEmpty else {
+                            fail()
+                            return
+                        }
                         Preferences.set(.token, to: linkToken)
 
-                        // Update link code
                         API.getLinkCode(success: {
                             success()
-                        }, fail: { error in
+                        }, fail: { _ in
                             fail()
                         })
                     }
-                case .failure(let error):
+                case .failure:
                     fail()
                 }
             }
     }
 
     static func linkDevice(code: String, success: @escaping () -> Void, fail: @escaping (_ error: String) -> Void) {
-        AF.request(actionPath(.link), method: .post, parameters: formParameters(["type": "control", "link_code": code]), headers: headers)
+        post(.link, parameters: ["type": "control", "link_code": code])
             .responseJSON { response in
                 switch response.result {
                 case .success(let value):
@@ -54,12 +56,8 @@ extension API {
                     if !json["success"].boolValue {
                         fail(json["errors"][0]["translated"].stringValue)
                     } else {
-                        // Save token
                         Preferences.set(.token, to: json["data"]["link_token"].stringValue)
-                        
-                        
 
-                        // Update link code
                         API.getLinkCode(success: {
                             success()
                         }, fail: { error in
@@ -91,20 +89,7 @@ extension API {
     }
 
     static func emailLinkCode(email: String, success: @escaping () -> Void, fail: @escaping (_ error: String) -> Void) {
-        post(.emailLinkCode, parameters: ["email": email])
-        .responseJSON { response in
-            switch response.result {
-            case .success(let value):
-                let json = JSON(value)
-                if !json["success"].boolValue {
-                    fail(json["errors"][0]["translated"].stringValue)
-                } else {
-                    success()
-                }
-            case .failure(let error):
-                fail(error.localizedDescription)
-            }
-        }
+        fail("Email link code is no longer available in API v1.7. Use the link code shown in Settings instead.".localized())
     }
 
     static func getAppdbAppsBundleIdsTicket(success: @escaping (_ ticket: String) -> Void, fail: @escaping (_ error: String) -> Void) {

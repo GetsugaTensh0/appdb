@@ -14,9 +14,8 @@ extension API {
 
     static func getUDID(success: @escaping (String) -> Void, fail: @escaping (String) -> Void) {
 
-        // Get UDID from managed configuration
         guard let deviceUdid = UserDefaults.standard.dictionary(forKey: "com.apple.configuration.managed")?["dbservicesUDID"] as? String else {
-            AF.request(Global.signingCertsUdidApi + "&lt=\(Preferences.linkToken)", parameters: ["client": "appdb unofficial client"], headers: headers)
+            AF.request(Global.signingCertsUdidApi, parameters: ["lt": Preferences.linkToken, "client": "appdb unofficial client"], headers: headers)
                 .responseJSON { response in
                     switch response.result {
                     case .success(let value):
@@ -30,7 +29,6 @@ extension API {
                             Preferences.set(.email, to: email)
                             Preferences.set(.udid, to: udid)
 
-                            // Update link code
                             API.getLinkCode(success: {
                                 success(udid)
                             }, fail: { error in

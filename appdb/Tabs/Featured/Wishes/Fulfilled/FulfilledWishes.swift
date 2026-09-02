@@ -124,7 +124,9 @@ class FulfilledWishes: LoadingTableView {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
 
-        let vc = Details(type: .ios, trackid: items[indexPath.row].trackid.description)
+        let item = items[indexPath.row]
+        let identifier = item.fulfilledUoid.isEmpty ? item.trackid.description : item.fulfilledUoid
+        let vc = Details(type: .ios, trackid: identifier)
         navigationController?.pushViewController(vc, animated: true)
     }
 }

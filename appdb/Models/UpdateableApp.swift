@@ -44,15 +44,26 @@ extension UpdateableApp: Mappable {
         versionNew <- map["version_new"]
         alongsideId <- map["alongside_id"]
         trackid <- map["trackid"]
+        if trackid.isEmpty, let intId = map.JSON["trackid"] as? Int {
+            trackid = String(intId)
+        }
         uoid <- map["uoid"]
+        if uoid.isEmpty { uoid <- map["universal_object_identifier"] }
         image <- map["image"]
+        if image.isEmpty { image <- map["icon_uri"] }
         updateable <- map["updateable"]
         type <- map["type"]
         name <- map["name"]
         whatsnew <- map["whatsnew"]
         date <- map["added"]
+        if date.isEmpty, let intAdded = map.JSON["added"] as? Int {
+            date = String(intAdded)
+        }
 
         if trackid.isEmpty { trackid <- map["id"] }
+        if trackid.isEmpty, let intId = map.JSON["id"] as? Int {
+            trackid = String(intId)
+        }
         if trackid.isEmpty { trackid <- map["universal_object_identifier"] }
         if trackid.isEmpty { trackid = uoid }
 

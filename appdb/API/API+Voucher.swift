@@ -12,36 +12,10 @@ import SwiftyJSON
 extension API {
 
     static func activateVoucher(voucher: String, success: @escaping () -> Void, fail: @escaping (_ error: String) -> Void) {
-        post(.activatePro, parameters: ["voucher": voucher])
-        .responseJSON { response in
-            switch response.result {
-            case .success(let value):
-                let json = JSON(value)
-                if !json["success"].boolValue {
-                    fail(json["errors"][0]["translated"].stringValue)
-                } else {
-                    success()
-                }
-            case .failure(let error):
-                fail(error.localizedDescription)
-            }
-        }
+        fail("Voucher activation is no longer available in API v1.7. Use subscription options instead.".localized())
     }
 
     static func validateVoucher(voucher: String, success: @escaping () -> Void, fail: @escaping (_ error: String) -> Void) {
-        post(.validatePro, parameters: ["voucher": voucher])
-        .responseJSON { response in
-            switch response.result {
-            case .success(let value):
-                let json = JSON(value)
-                if !json["success"].boolValue {
-                    fail(json["errors"][0]["translated"].stringValue)
-                } else {
-                    success()
-                }
-            case .failure(let error):
-                fail(error.localizedDescription)
-            }
-        }
+        fail("Voucher validation is no longer available in API v1.7. Use subscription options instead.".localized())
     }
 }

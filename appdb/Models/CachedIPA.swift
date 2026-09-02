@@ -26,6 +26,9 @@ struct CachedIPA: Mappable {
         size <- map["size"]
         sizeHr <- map["size_hr"]
         addedAt <- map["added_at"]
+        if addedAt.isEmpty, let intDate = map.JSON["added_at"] as? Int {
+            addedAt = String(intDate)
+        }
 
         let dateFormatter = DateFormatter()
         dateFormatter.locale = Locale(identifier: Localize.currentLanguage())
