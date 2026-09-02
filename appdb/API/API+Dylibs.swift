@@ -12,6 +12,8 @@ import SwiftyJSON
 
 extension API {
 
+    static var enhancementIdsByName: [String: Int] = [:]
+
     static func getDylibs(success: @escaping (_ items: [String]) -> Void, fail: @escaping (_ error: String) -> Void) {
         post(.getDylibs)
             .responseJSON { response in
@@ -21,11 +23,14 @@ extension API {
                     if !json["success"].boolValue {
                         fail(json["errors"][0]["translated"].stringValue)
                     } else {
-                        let names = json["data"].arrayValue.map { item -> String in
-                            if !item["name"].stringValue.isEmpty { return item["name"].stringValue }
-                            if !item["title"].stringValue.isEmpty { return item["title"].stringValue }
-                            return item.stringValue
-                        }.filter { !$0.isEmpty }
+                        enhancementIdsByName.removeAll()
+                        let names = json["data"].arrayValue.compactMap { item -> String? in
+                            let name = item["name"].stringValue.isEmpty ? item["title"].stringValue : item["name"].stringValue
+                            guard !name.isEmpty else { return item.stringValue.isEmpty ? nil : item.stringValue }
+                            let id = item["id"].intValue
+                            if id != 0 { enhancementIdsByName[name] = id }
+                            return name
+                        }
                         success(names)
                     }
                 case .failure(let error):
@@ -78,7 +83,11 @@ extension API {
     }
 
     static func deleteDylib(name: String, success: @escaping () -> Void, fail: @escaping (_ error: String) -> Void) {
-        post(.deleteDylib, parameters: ["name": name, "enhancement": name])
+        var params: [String: Any] = ["name": name]
+        if let id = enhancementIdsByName[name] {
+            params["id"] = id
+        }
+        post(.deleteDylib, parameters: params)
             .responseJSON { response in
                 switch response.result {
                 case .success(let value):
