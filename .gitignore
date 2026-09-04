@@ -1,3 +1,4 @@
+# Xcode
 build/
 DerivedData/
 *.pbxuser
@@ -16,18 +17,40 @@ xcuserdata/
 *.ipa
 *.dSYM.zip
 *.dSYM
+*.xcworkspace/xcuserdata/
+
+# Swift Package Manager
+.build/
+Packages/
+Package.resolved
+/appdb.xcodeproj/project.xcworkspace/xcshareddata/swiftpm
+
+# Carthage
 Carthage/Checkouts
 Carthage/Build
-/.gitattributes
 /Cartfile.resolved
-/exportOptions.plist
+
+# CocoaPods
+Pods/
+
+# macOS
 .DS_Store
+*.swp
+*~
+
+# Secrets / credentials
+*.secret
+*.secrets
+.env
+.env.*
+
+# Project-specific
+/.gitattributes
+/exportOptions.plist
 /install
-/build
 /AppDB.sketch
 /nanopb.xcframework
 /GoogleUtilities.xcframework
 /GoogleMobileAds.framework
 /GoogleAppMeasurement.framework
 /PromisesObjC.xcframework
-/appdb.xcodeproj/project.xcworkspace/xcshareddata/swiftpm
