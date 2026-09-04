@@ -111,15 +111,32 @@ class AltStoreRepoApps: LoadingTableView {
 
             self.repo = _repo
 
-            if _repo.apps != nil && !_repo.apps!.isEmpty {
-                self.apps = _repo.apps!
+            if let inlineApps = _repo.apps, !inlineApps.isEmpty {
+                self.apps = inlineApps
+                self.state = .done
+                self.tableView.spr_endRefreshing()
+                self.tableView.reloadData()
+            } else if !_repo.contentsUri.isEmpty {
+                API.fetchRepoContents(contentsUri: _repo.contentsUri, success: { [weak self] fetchedApps in
+                    guard let self = self else { return }
+                    self.apps = fetchedApps
+                    self.state = .done
+                    self.tableView.spr_endRefreshing()
+                    self.tableView.reloadData()
+                }, fail: { [weak self] error in
+                    guard let self = self else { return }
+                    self.state = .done
+                    self.tableView.spr_endRefreshing()
+                    self.tableView.reloadData()
+                    if self.apps.isEmpty {
+                        self.showErrorMessage(text: "Cannot connect".localized(), secondaryText: error, animated: false)
+                    }
+                })
+            } else {
+                self.state = .done
+                self.tableView.spr_endRefreshing()
+                self.tableView.reloadData()
             }
-
-            print("apps: \(self.apps)")
-
-            self.state = .done
-            self.tableView.spr_endRefreshing()
-            self.tableView.reloadData()
         }, fail: { error in
             self.tableView.spr_endRefreshing()
             self.tableView.reloadData()

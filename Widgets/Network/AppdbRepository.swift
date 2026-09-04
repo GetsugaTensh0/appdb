@@ -54,15 +54,23 @@ struct AppdbSearchResource: APIResource {
 
     init(_ contentType: ContentType, _ sortOrder: SortOrder, _ contentPrice: ContentPrice) {
         methodPath = "/v1.7/search_index/"
-        queryItems = [
+        var items = [
             URLQueryItem(name: "type", value: type(from: contentType)),
             URLQueryItem(name: "length", value: "25"),
             URLQueryItem(name: "start", value: "0"),
             URLQueryItem(name: "lang", value: "en"),
-            URLQueryItem(name: "brand", value: "appdb")
+            URLQueryItem(name: "brand", value: "appdb"),
+            URLQueryItem(name: "compatibility", value: "ios")
         ]
-        _ = contentPrice
-        _ = sortOrder
+        switch contentPrice {
+        case .paid:
+            items.append(URLQueryItem(name: "cents_min", value: "1"))
+        case .free:
+            items.append(URLQueryItem(name: "cents_max", value: "0"))
+        default:
+            break
+        }
+        queryItems = items
     }
 }
 
