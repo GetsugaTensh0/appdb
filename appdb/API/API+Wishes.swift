@@ -29,7 +29,11 @@ extension API {
     }
 
     static func getPublishRequests(includeAll: Bool, page: Int = 1, success: @escaping (_ items: [WishApp]) -> Void, fail: @escaping (_ error: String) -> Void) {
-        post(.getPublishRequests, parameters: ["type": "ios", "include_all": includeAll ? 1 : 0, "start": 25 * (page - 1), "length": 25])
+        var params: [String: Any] = ["type": "ios", "start": 25 * (page - 1), "length": 25]
+        if !includeAll {
+            params["filter"] = "new"
+        }
+        post(.getPublishRequests, parameters: params)
             .responseArray(keyPath: "data") { (response: AFDataResponse<[WishApp]>) in
                 switch response.result {
                 case .success(let results):

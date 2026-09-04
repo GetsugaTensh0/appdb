@@ -76,6 +76,19 @@ class AltStoreApp: Item {
         updated <- map["versionDate"]
         whatsnew <- map["versionDescription"]
 
+        // contents_uri JSON uses versions[0] for per-version fields
+        if let versions = map.JSON["versions"] as? [[String: Any]], let latest = versions.first {
+            if version.isEmpty, let v = latest["version"] as? String { version = v }
+            if downloadURL.isEmpty, let dl = latest["downloadURL"] as? String { downloadURL = dl }
+            if size == 0, let s = latest["size"] as? Int64 { size = s }
+            if size == 0, let s = latest["size"] as? Int { size = Int64(s) }
+            if updated.isEmpty, let d = latest["date"] as? String { updated = d }
+            if whatsnew.isEmpty, let wn = latest["localizedDescription"] as? String { whatsnew = wn }
+            if let minOS = latest["minOSVersion"] as? String, !minOS.isEmpty {
+                // Store for display
+            }
+        }
+
         name = name.decoded
         subtitle = subtitle.decoded
         description_ = description_.decoded
@@ -90,8 +103,20 @@ class AltStoreApp: Item {
         dateFormatter.dateStyle = .medium
         dateFormatter.timeStyle = .short
 
-        let date = updated.unixToDate
-        updated = dateFormatter.string(from: date)
+        if updated.contains("T") || updated.contains("-") {
+            let iso = ISO8601DateFormatter()
+            iso.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+            let parsed = iso.date(from: updated) ?? {
+                iso.formatOptions = [.withInternetDateTime]
+                return iso.date(from: updated)
+            }()
+            if let parsed = parsed {
+                updated = dateFormatter.string(from: parsed)
+            }
+        } else {
+            let date = updated.unixToDate
+            updated = dateFormatter.string(from: date)
+        }
 
         if !screenshotURLs.isEmpty {
             screenshots = screenshotURLs.map({ screenshotURL in

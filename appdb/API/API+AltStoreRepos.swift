@@ -6,8 +6,10 @@
 //  Copyright © 2023 stev3fvcks. All rights reserved.
 //
 
+import Foundation
 import Alamofire
 import SwiftyJSON
+import ObjectMapper
 
 extension API {
 
@@ -61,6 +63,26 @@ extension API {
                     fail(error.localizedDescription)
                 }
             }
+    }
+
+    static func fetchRepoContents(contentsUri: String, success: @escaping (_ apps: [AltStoreApp]) -> Void, fail: @escaping (_ error: String) -> Void) {
+        guard let url = URL(string: contentsUri) else {
+            fail("Invalid contents URL")
+            return
+        }
+        AF.request(url, headers: headers).responseJSON { response in
+            switch response.result {
+            case .success(let value):
+                let json = JSON(value)
+                let appsArray = json["apps"].arrayValue
+                let apps: [AltStoreApp] = appsArray.compactMap { entry in
+                    Mapper<AltStoreApp>().map(JSON: entry.dictionaryObject ?? [:])
+                }
+                success(apps)
+            case .failure(let error):
+                fail(error.localizedDescription)
+            }
+        }
     }
 
     static func deleteAltStoreRepo(id: String, success: @escaping () -> Void, fail: @escaping (_ error: String) -> Void) {
