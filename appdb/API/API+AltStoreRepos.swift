@@ -6,6 +6,7 @@
 //  Copyright © 2023 stev3fvcks. All rights reserved.
 //
 
+import Foundation
 import Alamofire
 import SwiftyJSON
 import ObjectMapper
