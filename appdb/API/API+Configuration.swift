@@ -69,7 +69,7 @@ extension API {
                             Preferences.set(.plusProvider, to: data["plus_provider"].stringValue)
                             Preferences.set(.plusSupportUri, to: data["plus_support_uri"].stringValue)
 
-                            Preferences.set(.disableRevocationChecks, to: data["disable_protection_checks"].stringValue == "yes")
+                            Preferences.set(.disableRevocationChecks, to: data["use_revoked_certs"].stringValue == "yes")
                             Preferences.set(.signingIdentityType, to: data["signing_identity_type"].stringValue)
                             Preferences.set(.optedOutFromEmails, to: data["is_opted_out_from_emails"].stringValue == "yes")
                             Preferences.set(.linkType, to: data["link_type"].stringValue)
@@ -102,8 +102,7 @@ extension API {
                             switch key {
                             case .askForOptions: Preferences.set(.askForInstallationOptions, to: value == "yes")
                             case .ignoreCompatibility: Preferences.set(.ignoreCompatibility, to: value == "yes")
-                            case .disableProtectionChecks: Preferences.set(.disableRevocationChecks, to: value == "yes")
-                            case .forceDisablePRO: Preferences.set(.forceDisablePRO, to: value == "yes")
+                            case .useRevokedCerts: Preferences.set(.disableRevocationChecks, to: value == "yes")
                             case .clearDevEntity: break
                             case .signingIdentityType: Preferences.set(.signingIdentityType, to: value)
                             case .enterpriseCertId: Preferences.set(.enterpriseCertId, to: value)
