@@ -1,5 +1,15 @@
 # Changelog
 
+## Cleanup — remove dead v1.6 UI (post v1.7)
+
+- Removed voucher activate/validate API stubs and related error mappings.
+- Removed Email Link Code Settings row and stub (use Settings → Link Code instead).
+- Removed IPA cache reinstall stub and intermediate Size/In Update cache screen; Install History now opens the history list directly (`get_installation_history`).
+- Removed unused `appsync` / `forceDisablePRO` preference leftovers.
+- Remapped Advanced Options “revocation” toggle to v1.7 `use_revoked_certs`.
+- Grouped Settings (Libraries & Status, Notifications) and improved Downloads empty-state copy.
+- Kept working search types `ios` / `cydia` / `books` (still present in API v1.7 `contentType`).
+
 ## v1.7 API Modernization (GetsugaTensh0 fork)
 
 Updated by [Dustin Seehaver](https://github.com/GetsugaTensh0) to work with the latest appdb.to API (v1.7).

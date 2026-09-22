@@ -117,7 +117,7 @@ extension Settings {
         
         if Preferences.isPlus {
             deviceConfigRows.append( StaticRow(text: "Install History".localized(), selection: { [unowned self] _ in
-                self.push(IPACache())
+                self.push(CachedIPAs())
             }, accessory: .disclosureIndicator, cellClass: SimpleStaticCell.self))
         }
         deviceConfigRows.append(StaticRow(text: "Advanced Options".localized(), selection: { [unowned self] _ in
@@ -150,23 +150,20 @@ extension Settings {
                     }
                 )
             ], footer: .title("Use this code if you want to link new devices to appdb. Press and hold the cell to copy it, or tap it to generate a new one.".localized())),
-            StaticSection(header: .title("Device Configuration".localized()), rows: deviceConfigRows),
-            StaticSection(rows: [
+            StaticSection(header: .title("Device Configuration".localized()), rows: deviceConfigRows,
+                footer: .title("Install History lists previous installs from this device via API v1.7.".localized())),
+            StaticSection(header: .title("Libraries & Status".localized()), rows: [
                 StaticRow(text: "Device Status".localized(), selection: { [unowned self] _ in
                     self.push(DeviceStatus())
-                }, accessory: .disclosureIndicator, cellClass: SimpleStaticCell.self)
-            ]),
-            StaticSection(rows: [
+                }, accessory: .disclosureIndicator, cellClass: SimpleStaticCell.self),
                 StaticRow(text: "My Enhancements".localized(), selection: { [unowned self] _ in
                     self.push(MyDylibs())
-                }, accessory: .disclosureIndicator, cellClass: SimpleStaticCell.self)
-            ]),
-            StaticSection(rows: [
+                }, accessory: .disclosureIndicator, cellClass: SimpleStaticCell.self),
                 StaticRow(text: "AltStore Repos".localized(), selection: { [unowned self] _ in
                     self.push(AltStoreRepos())
                 }, accessory: .disclosureIndicator, cellClass: SimpleStaticCell.self)
             ]),
-            StaticSection(rows: [
+            StaticSection(header: .title("Notifications".localized()), rows: [
                 StaticRow(text: "Show badge for updates".localized(), cellClass: SwitchCell.self, context: ["valueChange": { new in
                     Preferences.set(.showBadgeForUpdates, to: new)
                 }, "value": Preferences.showBadgeForUpdates])

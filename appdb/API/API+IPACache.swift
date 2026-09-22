@@ -3,7 +3,7 @@
 //  appdb
 //
 //  Created by ned on 05/01/22.
-//  Copyright Â© 2022 ned. All rights reserved.
+//  Copyright © 2022 ned. All rights reserved.
 //
 
 import UIKit
@@ -14,7 +14,7 @@ import ObjectMapper
 extension API {
 
     static func getIPACacheStatus(success: @escaping (_ status: IPACacheStatus) -> Void, fail: @escaping (_ error: NSError) -> Void) {
-        post(.getIpaCacheStatus)
+        post(.getInstallationHistory)
             .responseJSON { response in
                 switch response.result {
                 case .success(let value):
@@ -49,7 +49,4 @@ extension API {
             }
     }
 
-    static func reinstallEverything(success: @escaping () -> Void, fail: @escaping (_ error: String) -> Void) {
-        fail("This feature is no longer available".localized())
-    }
 }
