@@ -63,8 +63,9 @@ class Downloading: LoadingCollectionView {
 
     private func setErrorMessageIfEmpty() {
         let noQueuesMessage = "No active downloads".localized()
+        let hint = "Tap + to download an IPA from a URL, or install an app to see progress here".localized()
         if case LoadingCollectionView.State.error(noQueuesMessage, _, _) = state {} else {
-            state = .error(first: noQueuesMessage, second: "", animated: false)
+            state = .error(first: noQueuesMessage, second: hint, animated: false)
         }
     }
 

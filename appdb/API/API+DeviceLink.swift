@@ -88,9 +88,6 @@ extension API {
         }
     }
 
-    static func emailLinkCode(email: String, success: @escaping () -> Void, fail: @escaping (_ error: String) -> Void) {
-        fail("Email link code is no longer available in API v1.7. Use the link code shown in Settings instead.".localized())
-    }
 
     static func getAppdbAppsBundleIdsTicket(success: @escaping (_ ticket: String) -> Void, fail: @escaping (_ error: String) -> Void) {
         post(.getAppdbAppsBundleIdsTicket)

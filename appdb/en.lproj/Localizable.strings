@@ -502,9 +502,17 @@
 "App icon was set to '%@'" = "App icon was set to '%@'";
 
 // v1.7+ additions
-"Install an app to see signing progress here" = "Install an app to see signing progress here";
 "Command cancelled" = "Command cancelled";
-"This feature is no longer available" = "This feature is no longer available";
-"Voucher activation is no longer available in API v1.7. Use subscription options instead." = "Voucher activation is no longer available in API v1.7. Use subscription options instead.";
-"Voucher validation is no longer available in API v1.7. Use subscription options instead." = "Voucher validation is no longer available in API v1.7. Use subscription options instead.";
-"Email link code is no longer available in API v1.7. Use the link code shown in Settings instead." = "Email link code is no longer available in API v1.7. Use the link code shown in Settings instead.";
+"Install or reinstall an app to track signing and install progress here" = "Install or reinstall an app to track signing and install progress here";
+"Tap + to download an IPA from a URL, or install an app to see progress here" = "Tap + to download an IPA from a URL, or install an app to see progress here";
+"Add IPAs via Files/Share Sheet, or download one from the Downloading tab" = "Add IPAs via Files/Share Sheet, or download one from the Downloading tab";
+"Upload a local IPA to your personal library — it will show up here for install" = "Upload a local IPA to your personal library — it will show up here for install";
+"Use Revoked Certificates" = "Use Revoked Certificates";
+"Device Tools" = "Device Tools";
+"Libraries & Status" = "Libraries & Status";
+"Notifications" = "Notifications";
+"Install History lists previous installs from this device via API v1.7." = "Install History lists previous installs from this device via API v1.7.";
+"No install history found" = "No install history found";
+"Install History" = "Install History";
+"Install History Items" = "Install History Items";
+"Install history for current device" = "Install history for current device";

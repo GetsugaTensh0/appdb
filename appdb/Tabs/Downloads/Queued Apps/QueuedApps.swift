@@ -67,7 +67,7 @@ class QueuedApps: LoadingCollectionView {
 
     private func setErrorMessageIfEmpty() {
         let noQueuesMessage = "No queued downloads".localized()
-        let hint = "Install an app to see signing progress here".localized()
+        let hint = "Install or reinstall an app to track signing and install progress here".localized()
         if case LoadingCollectionView.State.error(noQueuesMessage, _, _) = state {} else {
             state = .error(first: noQueuesMessage, second: hint, animated: false)
         }

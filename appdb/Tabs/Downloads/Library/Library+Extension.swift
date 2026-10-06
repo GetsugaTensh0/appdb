@@ -19,13 +19,13 @@ extension Library {
             switch section {
             case .local:
                 if localIpas.isEmpty {
-                    footer.configure("No Local IPAs Found".localized(), secondaryText: "Use iTunes File Sharing or import them from other apps".localized())
+                    footer.configure("No Local IPAs Found".localized(), secondaryText: "Add IPAs via Files/Share Sheet, or download one from the Downloading tab".localized())
                 } else {
                     footer.configure("")
                 }
             case .myappstore:
                 if myAppstoreIpas.isEmpty {
-                    footer.configure("No MyAppStore apps".localized(), secondaryText: "This is your personal IPA library! Apps you upload over time will appear here".localized())
+                    footer.configure("No MyAppStore apps".localized(), secondaryText: "Upload a local IPA to your personal library — it will show up here for install".localized())
                 } else {
                     footer.configure("")
                 }
